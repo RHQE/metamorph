@@ -1,2 +1,2 @@
 # metamorph
-Exhibiting structural change of test run metadata.
+Exhibiting structural change of test metadata.
