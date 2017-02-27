@@ -60,7 +60,7 @@ def parse_args():
         metavar='<count>',
         type=int,
         default=1,
-        help='Limit number of messages to catch. 0 for unlimited'
+        help='Limit number of messages to catch.'
     )
     return parser.parse_args()
 
