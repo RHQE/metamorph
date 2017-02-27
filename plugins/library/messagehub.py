@@ -28,8 +28,7 @@ options:
   host:
     description:
       - Message bus host.
-    required: false
-    default: ci-bus.lab.eng.rdu2.redhat.com
+    required: true
 
   port:
     description:
@@ -70,6 +69,7 @@ CI message:
     type: dictionary
     sample: {"messages": [...]}
 '''
+
 
 import stomp
 import logging
@@ -120,7 +120,7 @@ def main():
         "user": {"required": True, "type": "str"},
         "password": {"required": True, "type": "str"},
         "selector": {"required": False, "type": "str"},
-        "host": {"default": 'ci-bus.lab.eng.rdu2.redhat.com', "type": "str"},
+        "host": {"required": True, "type": "str"},
         "port": {"default": 61613, "type": "int"},
         "destination": {"default": '/topic/CI', "type": "str"},
         "count": {"default": 1, "type": "int"}

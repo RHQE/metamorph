@@ -36,7 +36,6 @@ def parse_args():
         '--host',
         dest='host',
         metavar='<host>',
-        default='ci-bus.lab.eng.rdu2.redhat.com',
         help='Message bus host.'
     )
     parser.add_argument(
