@@ -1,16 +1,37 @@
 #!/usr/bin/python
-
+import logging
+import logging.config
+import os
 import argparse
 import time
 import stomp
 import json
 
 
+def setup_logging(default_path='logging.json', default_level=logging.INFO, env_key='LOG_CFG'):
+    """Setup logging configuration
+    :param default_path Default path to logging.json file
+    :param default_level Level of logging
+    :param env_key Environmental variable which contains logging configuration file path
+
+    """
+    path = default_path
+    value = os.getenv(env_key, None)
+    if value:
+        path = value
+    if os.path.exists(path):
+        with open(path, 'rt') as f:
+            config = json.load(f)
+        logging.config.dictConfig(config)
+    else:
+        logging.basicConfig(level=default_level)
+
+
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Subscribe to the Red Hat CI message bus.'
+        description='Subscribe to CI message bus.'
     )
     parser.add_argument(
         '--user',
@@ -36,6 +57,7 @@ def parse_args():
         '--host',
         dest='host',
         metavar='<host>',
+        required=True,
         help='Message bus host.'
     )
     parser.add_argument(
@@ -81,6 +103,7 @@ class CIListener(stomp.ConnectionListener):
 
 
 def main():
+    setup_logging(default_path="../logging.json")
     args = parse_args()
     conn = stomp.Connection([(args.host, args.port)])
     listener = CIListener(args.count)
@@ -100,13 +123,15 @@ def main():
             id='1',
             ack='auto'
         )
+    logging.info("Connection to message bus established.")
     while (not listener.error_message) and len(listener.metamorph_data) < args.count:
+        logging.info("Waiting 1s for CI message to arrive")
         time.sleep(1)
     conn.disconnect()
     if listener.error_message:
         exit("Got error message through message bus {0}".format(listener.error_message))
     with open("metamorph.json", "w") as metamorph:
-        json.dump(dict(messages=listener.metamorph_data), metamorph)
+        json.dump(dict(messages=listener.metamorph_data), metamorph, indent=2)
 
 if __name__ == '__main__':
     main()

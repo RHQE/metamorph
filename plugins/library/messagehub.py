@@ -54,6 +54,7 @@ EXAMPLES = '''
   messagehub:
     user: "..."
     password: "..."
+    host: "..."
   register: result
 '''
 
@@ -152,6 +153,8 @@ def main():
     conn.disconnect()
 
     if not listener.error_message:
+        with open("metamorph.json", "w") as metamorph:
+            json.dump(dict(messages=listener.metamorph_data), metamorph, indent=2)
         module.exit_json(changed=True, meta=dict(messages=listener.metamorph_data))
     else:
         module.fail_json(msg="Error deleting repo", meta=listener.error_message)
