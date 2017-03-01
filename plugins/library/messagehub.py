@@ -13,40 +13,54 @@ options:
   user:
     description:
       - Username to use to connect to the message bus.
+      - Mutually exclusive with env-variable
     required: true
 
   password:
     description:
       - Password to use to connect to the message bus.
+      - Mutually exclusive with env-variable
     required: true
 
   selector:
     description:
       - JMS selector for filtering messages.
+      - Mutually exclusive with env-variable
     required: false
 
   host:
     description:
       - Message bus host.
+      - Mutually exclusive with env-variable
     required: true
 
   port:
     description:
       - Message bus port.
+      - Mutually exclusive with env-variable
     required: false
     default: 61613
 
   destination:
     description:
       - Message bus topic/subscription.
+      - Mutually exclusive with env-variable
     required: false
     default: /topic/CI
 
   count:
     description:
       - Limit number of messages to catch.
+      - Mutually exclusive with env-variable
     required: false
     default: 1
+
+  env-variable:
+    description:
+      - Name of environmental variable which contains CI message in .json format.
+      - Mutually exclusive with user, password, selector, host, port, destination and count
+    required: true
+    default: None
 '''
 
 EXAMPLES = '''
@@ -55,6 +69,11 @@ EXAMPLES = '''
     user: "..."
     password: "..."
     host: "..."
+  register: result
+
+- name: Get single message from environmental variable
+  messagehub:
+    env-variable: "..."
   register: result
 '''
 
@@ -78,26 +97,8 @@ import logging.config
 import time
 import os
 import json
+from lib.logging_conf import setup_logging
 from ansible.module_utils.basic import AnsibleModule
-
-
-def setup_logging(default_path='logging.json', default_level=logging.INFO, env_key='LOG_CFG'):
-    """Setup logging configuration
-    :param default_path Default path to logging.json file
-    :param default_level Level of logging
-    :param env_key Environmental variable which contains logging configuration file path
-
-    """
-    path = default_path
-    value = os.getenv(env_key, None)
-    if value:
-        path = value
-    if os.path.exists(path):
-        with open(path, 'rt') as f:
-            config = json.load(f)
-        logging.config.dictConfig(config)
-    else:
-        logging.basicConfig(level=default_level)
 
 
 class CIListener(stomp.ConnectionListener):
@@ -116,18 +117,7 @@ class CIListener(stomp.ConnectionListener):
             self.count += 1
 
 
-def main():
-    fields = {
-        "user": {"required": True, "type": "str"},
-        "password": {"required": True, "type": "str"},
-        "selector": {"required": False, "type": "str"},
-        "host": {"required": True, "type": "str"},
-        "port": {"default": 61613, "type": "int"},
-        "destination": {"default": '/topic/CI', "type": "str"},
-        "count": {"default": 1, "type": "int"}
-    }
-    setup_logging(default_path="../../logging.json")
-    module = AnsibleModule(argument_spec=fields)
+def messagebus_run(module):
     conn = stomp.Connection([(module.params['host'], module.params['port'])])
     listener = CIListener(module.params['count'])
     conn.set_listener('CI Listener', listener)
@@ -151,13 +141,49 @@ def main():
         logging.info("Waiting 1s for CI message to arrive")
         time.sleep(1)
     conn.disconnect()
+    return listener.error_message, listener.metamorph_data[:module.params['count']]
 
-    if not listener.error_message:
-        with open("metamorph.json", "w") as metamorph:
-            json.dump(dict(messages=listener.metamorph_data), metamorph, indent=2)
-        module.exit_json(changed=True, meta=dict(messages=listener.metamorph_data))
+
+def main():
+    messagebus = {
+        "user": {"type": "str"},
+        "password": {"type": "str"},
+        "selector": {"type": "str"},
+        "host": {"type": "str"},
+        "port": {"default": 61613, "type": "int"},
+        "destination": {"default": '/topic/CI', "type": "str"},
+        "count": {"default": 1, "type": "int"},
+        "env-variable": {"type": "str"}
+    }
+    mutually_exclusive = [
+        ['env-variable', 'user'],
+        ['env-variable', 'password'],
+        ['env-variable', 'selector'],
+        ['env-variable', 'host'],
+        ['env-variable', 'port'],
+        ['env-variable', 'destination'],
+        ['env-variable', 'count']
+    ]
+    setup_logging(default_path="../../etc/logging.json")
+    module = AnsibleModule(argument_spec=messagebus, mutually_exclusive=mutually_exclusive)
+    error_message = ""
+    ci_message = ""
+    if module.params['env-variable']:
+        ci_message = os.environ.get(module.params['env-variable'], "UNKNOWN")
+        if ci_message == "UNKNOWN":
+            logging.error("Environmental variable didn't found")
+            error_message = "Environmental variable didn't found"
+    elif not (module.params['user'] and module.params['password'] and module.params['host']):
+        module.fail_json(msg="Error in argument parsing. Arguments: user, password and host are required")
     else:
-        module.fail_json(msg="Error deleting repo", meta=listener.error_message)
+        error_message, ci_message = messagebus_run(module)
+
+    if not error_message:
+        with open("metamorph.json", "w") as metamorph:
+            json.dump(dict(messages=ci_message), metamorph, indent=2)
+        module.exit_json(changed=True, meta=dict(messages=ci_message))
+    else:
+        module.fail_json(msg="Error occurred in processing CI Message.", meta=error_message)
 
 
 if __name__ == '__main__':
