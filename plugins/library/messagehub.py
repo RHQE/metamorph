@@ -85,8 +85,9 @@ EXAMPLES = '''
 - name: Get single message from environmental variable and store it into hello.json
   messagehub:
     env-variable: "..."
-    output "hello.json"
+    output: "hello.json"
   register: result
+>>>>>>> Added support of different json output names.
 '''
 
 RETURN = '''
