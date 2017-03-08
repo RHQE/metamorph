@@ -61,6 +61,12 @@ options:
       - Mutually exclusive with user, password, selector, host, port, destination and count
     required: true
     default: None
+
+  output:
+    description:
+      - Output metadata file name where CI Message data will be stored.
+    required: false
+    default: metamorph.json
 '''
 
 EXAMPLES = '''
@@ -74,6 +80,12 @@ EXAMPLES = '''
 - name: Get single message from environmental variable
   messagehub:
     env-variable: "..."
+  register: result
+
+- name: Get single message from environmental variable and store it into hello.json
+  messagehub:
+    env-variable: "..."
+    output "hello.json"
   register: result
 '''
 
@@ -96,8 +108,7 @@ import logging
 import logging.config
 import time
 import os
-import json
-from lib.logging_conf import setup_logging
+from lib.logging_conf import setup_logging, storing_pretty_json
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -153,7 +164,8 @@ def main():
         "port": {"default": 61613, "type": "int"},
         "destination": {"default": '/topic/CI', "type": "str"},
         "count": {"default": 1, "type": "int"},
-        "env-variable": {"type": "str"}
+        "env-variable": {"type": "str"},
+        "output": {"type": "str", "default": "metamorph.json"}
     }
     mutually_exclusive = [
         ['env-variable', 'user'],
@@ -179,8 +191,7 @@ def main():
         error_message, ci_message = messagebus_run(module)
 
     if not error_message:
-        with open("metamorph.json", "w") as metamorph:
-            json.dump(dict(messages=ci_message), metamorph, indent=2)
+        storing_pretty_json(ci_message, module.params['output'])
         module.exit_json(changed=True, meta=dict(messages=ci_message))
     else:
         module.fail_json(msg="Error occurred in processing CI Message.", meta=error_message)

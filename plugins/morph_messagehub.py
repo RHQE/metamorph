@@ -35,7 +35,7 @@ def messagebus_run(args):
     conn.disconnect()
     if listener.error_message:
         exit("Got error message through message bus {0}".format(listener.error_message))
-    storing_pretty_json(listener.metamorph_data[:args.count])
+    storing_pretty_json(listener.metamorph_data[:args.count], args.output)
 
 
 def env_run(args):
@@ -43,7 +43,7 @@ def env_run(args):
     if env_data == "UNKNOWN":
         logging.error("Environmental variable didn't found")
         exit(1)
-    storing_pretty_json(env_data)
+    storing_pretty_json(env_data, args.output)
 
 
 def parse_args():
@@ -104,6 +104,12 @@ def parse_args():
         default=1,
         help='Limit number of messages to catch.'
     )
+    messagebus.add_argument(
+        '--output',
+        metavar='<output-metadata-file>',
+        default='metamorph.json',
+        help='Output metadata file name where CI Message data will be stored',
+        nargs='?')
     messagebus.set_defaults(func=messagebus_run)
     env.add_argument(
         '--env-variable',
@@ -112,6 +118,12 @@ def parse_args():
         required=True,
         help="Name of environmental variable which contains CI message in .json format."
     )
+    env.add_argument(
+        '--output',
+        metavar='<output-metadata-file>',
+        default='metamorph.json',
+        help='Output metadata file name where CI Message data will be stored',
+        nargs='?')
     env.set_defaults(func=env_run)
     return parser.parse_args()
 
