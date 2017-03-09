@@ -29,8 +29,9 @@ def messagebus_run(args):
             ack='auto'
         )
     logging.info("Connection to message bus established.")
+    logging.info("Waiting for CI message to arrive ...")
     while (not listener.error_message) and len(listener.metamorph_data) < args.count:
-        logging.info("Waiting 1s for CI message to arrive")
+        logging.debug("Waiting 1s for CI message to arrive")
         time.sleep(1)
     conn.disconnect()
     if listener.error_message:
@@ -41,7 +42,7 @@ def messagebus_run(args):
 def env_run(args):
     env_data = os.environ.get(args.env_variable, "UNKNOWN")
     if env_data == "UNKNOWN":
-        logging.error("Environmental variable didn't found")
+        logging.error("Environmental variable not found")
         exit(1)
     storing_pretty_json(env_data, args.output)
 

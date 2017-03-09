@@ -1,7 +1,7 @@
 #!/usr/bin/python
 ANSIBLE_METADATA = {'status': ['preview'],
                     'supported_by': 'community',
-                    'version': '1.0'}
+                    'version': '0.1'}
 
 DOCUMENTATION = '''
 ---
@@ -149,8 +149,9 @@ def messagebus_run(module):
             ack='auto'
         )
     logging.info("Connection to message bus established.")
+    logging.info("Waiting for CI message to arrive ...")
     while (not listener.error_message) and len(listener.metamorph_data) < module.params['count']:
-        logging.info("Waiting 1s for CI message to arrive")
+        logging.debug("Waiting 1s for CI message to arrive")
         time.sleep(1)
     conn.disconnect()
     return listener.error_message, listener.metamorph_data[:module.params['count']]
@@ -184,8 +185,8 @@ def main():
     if module.params['env-variable']:
         ci_message = os.environ.get(module.params['env-variable'], "UNKNOWN")
         if ci_message == "UNKNOWN":
-            logging.error("Environmental variable didn't found")
-            error_message = "Environmental variable didn't found"
+            logging.error("Environmental variable not found")
+            error_message = "Environmental variable not found"
     elif not (module.params['user'] and module.params['password'] and module.params['host']):
         module.fail_json(msg="Error in argument parsing. Arguments: user, password and host are required")
     else:
