@@ -1,0 +1,42 @@
+.. Metamorph documentation master file, created by
+   sphinx-quickstart on Thu Mar  9 11:07:20 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Metamorph's documentation!
+=====================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
+
+**Test metadata** term has many meanings. It could be **Test job metadata**, **Test run metadata**, **Test result metadata** or **Test report metadata**. The initial and major goal of **Metamorph** is to present the metadata of **test job** and **test run** into standard CI readable format.
+
+The second major goal of **Metamorph** is to extend it's support for test harness and test automation frameworks.
+
+Use Case
+--------
+Proposed tool solution shall be run before every CI job execution to provide needed test metadata. It will download/explore necessary test metadata and provide them a unified format.
+
+Installation
+------------
+Installation is simple. Metamorph repository contains *setup.py* file with all needed dependencies. For Metamorph installation you need to run ``python setup.py install``.
+
+Plugins
+-------
+Message bus reader
+++++++++++++++++++
+The purpose of this plugin is to sniff on CI message bus and get specific amount of CI messages.
+Second use case of this plugin is to read given environmental variable which contain CI message. Messages are then stored into specified json file.
+
+There are two ways how to run this plugin. First one is through CLI:
+
+* for message:   ``python3 morph_messagehub.py message --user <user> --password <password> --host <host>``
+* for environmental variable: ``python3 morph_messagehub.py env --env-variable <environmental-variable>``
+
+Second variant is to use implemented ansible module:
+
+* for message: ``ansible <host> -m messagehub -a "user=<user> password=<password> host=<host>"``
+* for environmental  variable:  ``ansible <host> -m messagehub -a "env-variable=<environmental-variable>"``
