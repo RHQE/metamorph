@@ -43,3 +43,8 @@ def storing_pretty_json(input_data, output="metamorph.json"):
     else:
         with open(output, "w") as metamorph:
             json.dump(dict(metamorph=input_data), metamorph, indent=2)
+
+
+def read_json_file(input_file):
+    with open(input_file, "r") as message:
+        return json.load(message)

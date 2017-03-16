@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from lib.logging_conf import setup_logging, read_json_file
+from metamorph.lib.support_functions import setup_logging, read_json_file
 import argparse
 import logging
 import json
