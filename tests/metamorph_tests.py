@@ -122,6 +122,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTupleEqual(client.get_component_nvr(component), ('first-sec-third-name', 'version', 'release'))
     # End of PDC tests
 
+    # Start of message data extractor tests
     def test_data_extractor_pass(self):
         message = {'message': {"weight": 0.2, "parent": None},
                    'header': {"owner": "jkulda",
@@ -160,6 +161,7 @@ class MyTestCase(unittest.TestCase):
         extractor = MessageDataExtractor(None)
         extractor.ci_message = message
         self.assertEqual(extractor.check_valid_ci_message(), False)
+    # End of message data extractor tests
 
 if __name__ == '__main__':
     unittest.main()
