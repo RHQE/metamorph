@@ -38,12 +38,6 @@ class MyTestCase(unittest.TestCase):
                               "release": "5.el7_1"
                               }
                    }
-        output = {'scratch': 'true',
-                  'version': '2.8.71',
-                  'owner': 'jkulda',
-                  'release': '5.el7_1',
-                  'package': 'setup',
-                  'target': 'rhel-7.1-candidate'}
         extractor = MessageDataExtractor(None)
         extractor.ci_message = message
         self.assertEqual(extractor.check_valid_ci_message(), False)

@@ -6,7 +6,7 @@ import time
 import os
 import stomp
 
-from lib.logging_conf import setup_logging, storing_pretty_json
+from lib.support_functions import setup_logging, storing_pretty_json
 
 
 def messagebus_run(args):
