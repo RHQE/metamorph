@@ -40,3 +40,13 @@ Second variant is to use implemented ansible module:
 
 * for message: ``ansible <host> -m messagehub -a "user=<user> password=<password> host=<host>"``
 * for environmental  variable:  ``ansible <host> -m messagehub -a "env-variable=<environmental-variable>"``
+
+Message data extractor
+++++++++++++++++++++++
+The aim of this plugin is to extract important metadata from CI messages like target, owners, release information and many more.
+
+Easiest way to run this plugin is by:
+``python3 message_data_extractor ci_message.json``
+
+Extracted data are stored in json file.
+
