@@ -6,12 +6,20 @@ import json
 
 
 class MessageDataExtractor(object):
+    """
+    Metadata Extractor from CI messages
+    """
 
     def __init__(self, ci_message_file):
         self.ci_message = {}
         self.ci_message_file = ci_message_file
 
     def get_ci_message_data(self):
+        """
+        Main function which runs extractor behavior
+
+        :return Json with extracted metadata
+        """
         self.read_input_file()
         if not self.check_valid_ci_message():
             logging.error("Given CI_message does not contain important data.")
@@ -31,6 +39,11 @@ class MessageDataExtractor(object):
         return self.is_closed_build(self.ci_message) and self.is_component_build(self.ci_message)
 
     def get_build_data(self):
+        """
+        Method for getting concrete data from ci_message
+
+        :returns json with extracted metadata
+        """
         return dict(package=self.ci_message['header']['package'],
                     release=self.ci_message['header']['release'],
                     version=self.ci_message['header']['version'],
