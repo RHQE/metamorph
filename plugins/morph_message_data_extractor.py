@@ -21,8 +21,17 @@ class MessageDataExtractor(object):
         :return Json with extracted metadata
         """
         self.read_input_file()
-        if not self.check_valid_ci_message():
-            logging.error("Given CI_message does not contain important data.")
+        try:
+            if not self.check_valid_ci_message():
+                logging.error("Given CI_message does not contain important data.")
+                exit(1)
+        except KeyError as key_detail:
+            logging.error("Given CI_message does not contain important key values. "
+                          "Missing key value: {}".format(key_detail))
+            exit(1)
+        except Exception as detail:
+            logging.error("Unexpected error happened during CI message key values extraction. "
+                          "See details: {}".format(detail))
             exit(1)
         return self.get_build_data()
 

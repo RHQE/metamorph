@@ -1,5 +1,5 @@
 import unittest
-from plugins.message_data_extractor import MessageDataExtractor
+from plugins.morph_message_data_extractor import MessageDataExtractor
 
 
 class MyTestCase(unittest.TestCase):
