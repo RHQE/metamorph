@@ -4,7 +4,7 @@ import json
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 from metamorph.plugins.morph_pdc import PDCApi
 from metamorph.library.pdc import PDCApi as PDCApiAnsible
-from metamorph.plugins.message_data_extractor import MessageDataExtractor
+from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
 
 
 class MyTestCase(unittest.TestCase):
