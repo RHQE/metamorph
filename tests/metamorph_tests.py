@@ -8,7 +8,7 @@ from metamorph.plugins.morph_messagehub import env_run
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 from metamorph.plugins.morph_pdc import PDCApi
 from metamorph.library.pdc import PDCApi as PDCApiAnsible
-from metamorph.plugins.message_data_extractor import MessageDataExtractor
+from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
 
 
 class SimpleClass(object):
@@ -253,47 +253,6 @@ class MyTestCase(unittest.TestCase):
         component = "first-sec-third-name-version-release"
         self.assertTupleEqual(client.get_component_nvr(component), ('first-sec-third-name', 'version', 'release'))
     # End of PDC tests
-
-    # Start of message data extractor tests
-    def test_data_extractor_pass(self):
-        message = {'message': {"weight": 0.2, "parent": None},
-                   'header': {"owner": "jkulda",
-                              "scratch": "true",
-                              "method": "build",
-                              "target": "rhel-7.1-candidate",
-                              "new": "CLOSED",
-                              "package": "setup",
-                              "version": "2.8.71",
-                              "release": "5.el7_1"
-                              }
-                   }
-        output = {'scratch': 'true',
-                  'version': '2.8.71',
-                  'owner': 'jkulda',
-                  'release': '5.el7_1',
-                  'package': 'setup',
-                  'target': 'rhel-7.1-candidate'}
-        extractor = MessageDataExtractor(None)
-        extractor.ci_message = message
-        self.assertEqual(extractor.check_valid_ci_message(), True)
-        self.assertEqual(extractor.get_build_data(), output)
-
-    def test_data_extractor_check_fail(self):
-        message = {'message': {"weight": 0.2, "parent": None},
-                   'header': {"owner": "jkulda",
-                              "scratch": "true",
-                              "method": "buildArch",
-                              "target": "rhel-7.1-candidate",
-                              "new": "CLOSED",
-                              "packages": "setup",
-                              "version": "2.8.71",
-                              "release": "5.el7_1"
-                              }
-                   }
-        extractor = MessageDataExtractor(None)
-        extractor.ci_message = message
-        self.assertEqual(extractor.check_valid_ci_message(), False)
-    # End of message data extractor tests
 
 if __name__ == '__main__':
     unittest.main()
