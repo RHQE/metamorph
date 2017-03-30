@@ -87,7 +87,6 @@ EXAMPLES = '''
     env-variable: "..."
     output: "hello.json"
   register: result
->>>>>>> Added support of different json output names.
 '''
 
 RETURN = '''
