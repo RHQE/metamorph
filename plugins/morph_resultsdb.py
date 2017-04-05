@@ -26,6 +26,7 @@ class ResultsDBApi(object):
         self.component_nvr = component_nvr
         self.test_tier = test_tier
         self.job_names_result = {}
+        self.tier_tag = True
 
     def get_resultsdb_data(self):
         if self.job_names:
@@ -83,14 +84,21 @@ class ResultsDBApi(object):
                        tier_tag=False)
         for single_job in self.job_names_result:
             ci_tier['job_name'].append({single_job: self.format_job_name_result(self.job_names_result[single_job])})
+        ci_tier['tier_tag'] = self.tier_tag
         result = {"tier": ci_tier}
         with open(output, "w") as metamorph:
             json.dump(dict(result=result), metamorph, indent=2)
 
     def format_job_name_result(self, job_name_result):
-        return dict(build_url=job_name_result['ref_url'].split('/console'),
-                    build_number=self.get_build_number_from_url(job_name_result['ref_url']),
-                    build_status=job_name_result['outcome'])
+        formatted_data = []
+        for single_job_result in job_name_result:
+            formatted_data.append(dict(build_url=single_job_result['ref_url'].split('/console')[0],
+                                       build_number=self.get_build_number_from_url(single_job_result['ref_url']),
+                                       build_status=single_job_result['outcome']))
+            if single_job_result['outcome'] == 'FAILED':
+                self.tier_tag = False
+
+        return formatted_data
 
     @staticmethod
     def get_build_number_from_url(job_build_url):
