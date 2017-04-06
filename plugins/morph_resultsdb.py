@@ -12,32 +12,33 @@ class ResultsDBApiException(Exception):
     pass
 
 
+class ResultsDBDataException(Exception):
+    pass
+
+
 class ResultsDBApi(object):
 
-    RESULTSDB_API_URL_ENDING = "/results?"
-    BASE_OPTIONS = "item={NVR}&CI_tier={ci_tier}"
     RESULTSDB_LIMITER = 10
 
     def __init__(self, job_names, component_nvr, test_tier, resultsdb_api_url):
-        if not resultsdb_api_url.endswith(self.RESULTSDB_API_URL_ENDING):
-            resultsdb_api_url += self.RESULTSDB_API_URL_ENDING
         self.resultsdb_api_url = resultsdb_api_url
         self.job_names = job_names
-        self.component_nvr = component_nvr
-        self.test_tier = test_tier
         self.job_names_result = {}
         self.tier_tag = True
+        self.url_options = {'CI_tier': test_tier, 'item': component_nvr}
 
     def get_resultsdb_data(self):
         if self.job_names:
             return self.get_job_names_result()
         else:
-            return self.get_jobs_by_nvr_and_tier(self.RESULTSDB_LIMITER)
+            queried_data = self.get_jobs_by_nvr_and_tier(self.RESULTSDB_LIMITER)
+            self.job_names_result = self.setup_output_data(queried_data)
+            return self.job_names_result
 
     @staticmethod
-    def query_resultsdb(url, url_options=""):
-        logging.debug("Running resultsbd API query with this url: {}".format(url + url_options))
-        response = requests.get(url + url_options)
+    def query_resultsdb(url, url_options=dict):
+        logging.debug("Running resultsbd API query with this url: {0} and options {1}".format(url, url_options))
+        response = requests.get(url, params=url_options)
         if response.status_code >= 300:
             logging.error("ERROR: Unable to access resultsdb site.")
             raise ResultsDBApiException("ERROR: Unable to access resultsdb site.")
@@ -48,27 +49,24 @@ class ResultsDBApi(object):
             i = 0
             is_url = True
             while is_url is not None:
-                options_url = self.BASE_OPTIONS.format(NVR=self.component_nvr, ci_tier=self.test_tier) + \
-                    "&job_names={0}&page={1}".format(job_name, i)
-                query_result = self.query_resultsdb(self.resultsdb_api_url, options_url)
+                self.url_options['job_names'] = job_name
+                self.url_options['page'] = i
+                query_result = self.query_resultsdb(self.resultsdb_api_url, self.url_options)
                 self.job_names_result[job_name] += query_result['data']
                 is_url = query_result['next']
         return self.job_names_result
 
     def get_jobs_by_nvr_and_tier(self, limit=10):
-        # TODO In future change options to BASE_OPTIONS
-        options = self.BASE_OPTIONS.format(NVR=self.component_nvr, ci_tier=self.test_tier)
-        url = self.resultsdb_api_url + options
         i = 0
         next_page = ""
         queried_data = []
         while next_page is not None and i < limit:
-            response_data = self.query_resultsdb(url, "&page={}".format(i))
+            self.url_options['page'] = i
+            response_data = self.query_resultsdb(self.resultsdb_api_url, self.url_options)
             i += 1
             next_page = response_data['next']
             queried_data += response_data['data']
-        self.job_names_result = self.setup_output_data(queried_data)
-        return self.job_names_result
+        return queried_data
 
     @staticmethod
     def setup_output_data(resultsdb_data):
@@ -78,8 +76,8 @@ class ResultsDBApi(object):
         return formatted_output
 
     def format_result(self):
-        ci_tier = dict(ci_tier=self.test_tier,
-                       nvr=self.component_nvr,
+        ci_tier = dict(ci_tier=self.url_options['CI_tier'],
+                       nvr=self.url_options['item'],
                        job_name=[],
                        tier_tag=False)
         for single_job in self.job_names_result:
@@ -119,7 +117,7 @@ def parse_args():
                         nargs="*",
                         help="Jenkins job name")
     parser.add_argument("--resultsdb-api-url",
-                        required=True,
+                        default="https://url.corp.redhat.com/resultdb",
                         help="Resultsdb api url from which job data will be queried.")
     parser.add_argument("--nvr",
                         type=str,

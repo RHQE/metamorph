@@ -1,0 +1,1 @@
+{"result": {"tier": {"ci_tier": "", "tier_tag": true, "job_name": [{"setup-2.8.71-5.el7_1": [{"build_status": "PASSED", "build_url": "http://someurl/864", "build_number": "864"}, {"build_status": "PASSED", "build_url": "http://someurl/864", "build_number": "864"}]}], "nvr": ""}}}
