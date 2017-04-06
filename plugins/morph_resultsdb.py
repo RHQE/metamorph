@@ -77,7 +77,7 @@ class ResultsDBApi(object):
             formatted_output[single_job['job_names']] += single_job
         return formatted_output
 
-    def store_results_in_json(self, output='metamorph.json'):
+    def format_result(self):
         ci_tier = dict(ci_tier=self.test_tier,
                        nvr=self.component_nvr,
                        job_name=[],
@@ -86,8 +86,7 @@ class ResultsDBApi(object):
             ci_tier['job_name'].append({single_job: self.format_job_name_result(self.job_names_result[single_job])})
         ci_tier['tier_tag'] = self.tier_tag
         result = {"tier": ci_tier}
-        with open(output, "w") as metamorph:
-            json.dump(dict(result=result), metamorph, indent=2)
+        return dict(result=result)
 
     def format_job_name_result(self, job_name_result):
         formatted_data = []
@@ -143,7 +142,9 @@ def main():
     args = parse_args()
     resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url)
     resultsdb.get_resultsdb_data()
-    resultsdb.store_results_in_json(args.output)
+    result = resultsdb.format_result()
+    with open(args.output, "w") as metamorph:
+        json.dump(dict(result=result), metamorph, indent=2)
 
 
 if __name__ == '__main__':
