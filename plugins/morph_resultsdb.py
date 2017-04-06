@@ -12,11 +12,10 @@ class ResultsDBApiException(Exception):
     pass
 
 
-class ResultsDBDataException(Exception):
-    pass
-
-
 class ResultsDBApi(object):
+    """
+    Class to communicate and process data with resultsDB
+    """
 
     RESULTSDB_LIMITER = 10
 
@@ -28,6 +27,11 @@ class ResultsDBApi(object):
         self.url_options = {'CI_tier': test_tier, 'item': component_nvr}
 
     def get_resultsdb_data(self):
+        """
+        Method get_resultsdb_data it's the main function from which data are received
+
+        :returns -- dictionary where keys are job names and their values are list of queried data
+        """
         if self.job_names:
             return self.get_job_names_result()
         else:
@@ -37,6 +41,14 @@ class ResultsDBApi(object):
 
     @staticmethod
     def query_resultsdb(url, url_options=dict):
+        """
+        This method queries resultsDB with given url and url_option variable
+
+        :param url -- resultdb api url
+        :param url_options -- dictionary of wanted options
+
+        :returns -- Queried data
+        """
         logging.debug("Running resultsbd API query with this url: {0} and options {1}".format(url, url_options))
         response = requests.get(url, params=url_options)
         if response.status_code >= 300:
@@ -45,6 +57,11 @@ class ResultsDBApi(object):
         return response.json()
 
     def get_job_names_result(self):
+        """
+        Method for getting data from resultsDB when job_names input was provided
+
+        :returns -- dictionary where keys are job names and their values are list of queried data
+        """
         for job_name in self.job_names:
             i = 0
             is_url = True
@@ -57,6 +74,12 @@ class ResultsDBApi(object):
         return self.job_names_result
 
     def get_jobs_by_nvr_and_tier(self, limit=10):
+        """
+        Method for getting data from resultsDB when only NVR and test_tier provided
+
+        :param limit -- Limit for amount of queried pages from resultsDB
+        :returns -- List of queried data
+        """
         i = 0
         next_page = ""
         queried_data = []
@@ -70,12 +93,26 @@ class ResultsDBApi(object):
 
     @staticmethod
     def setup_output_data(resultsdb_data):
+        """
+        Method for setting up data from get_job_by_nvr_and_tier method.
+        Data needs to be in dictionary where keys will be job names
+
+        :param resultsdb_data -- data from get_job_by_nvr_and_tier
+        :returns -- dictionary where keys are job names and their values are list of queried data
+        """
         formatted_output = {}
         for single_job in resultsdb_data:
             formatted_output[single_job['job_names']] += single_job
         return formatted_output
 
     def format_result(self):
+        """
+        Method which format's queried dictionary from upper methods
+        Need's to have it in predefined output format.
+        See: tests/sources/resultdsdb_output_result.json
+
+        :returns -- Formatted dictionary
+        """
         ci_tier = dict(ci_tier=self.url_options['CI_tier'],
                        nvr=self.url_options['item'],
                        job_name=[],
@@ -87,6 +124,12 @@ class ResultsDBApi(object):
         return dict(result=result)
 
     def format_job_name_result(self, job_name_result):
+        """
+        Format's single job name data into dictionary
+
+        :param job_name_result -- list of single jenkins job queried data
+        :returns -- Formatted single job data
+        """
         formatted_data = []
         for single_job_result in job_name_result:
             formatted_data.append(dict(build_url=single_job_result['ref_url'].split('/console')[0],
@@ -99,6 +142,12 @@ class ResultsDBApi(object):
 
     @staticmethod
     def get_build_number_from_url(job_build_url):
+        """
+        Method for parsing job build id from job build url
+
+        :param job_build_url -- job build url containing job build id
+        :returns -- job build id
+        """
         splitted = job_build_url.split('/')
         if splitted[-1].isnumeric():
             return splitted[-1]
