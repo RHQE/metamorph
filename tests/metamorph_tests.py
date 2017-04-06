@@ -23,6 +23,7 @@ class MyTestCase(unittest.TestCase):
         resultsdb.job_names_result = data
         self.assertRaises(KeyError, resultsdb.setup_output_data, [data])
 
+    @unittest.skip("Travis CI does not have access to RH site.")
     def test_resultdb_query(self):
         resultsdb = ResultsDBApi("", "kernel-3.10.0-632.el7", "1", "https://url.corp.redhat.com/resultdb2")
         self.assertEqual(len(resultsdb.get_jobs_by_nvr_and_tier()), 200)
