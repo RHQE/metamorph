@@ -40,3 +40,14 @@ Second variant is to use implemented ansible module:
 
 * for message: ``ansible <host> -m messagehub -a "user=<user> password=<password> host=<host>"``
 * for environmental  variable:  ``ansible <host> -m messagehub -a "env-variable=<environmental-variable>"``
+
+
+Test tier status
+++++++++++++++++
+Purpose of this plugin is to provide information whether component build should be tagged with test tier number or not.
+**Test tier status** plugin queries data from resultsDB and after metadata aggregation decides whether component build should be tagged or not.
+
+How to run this plugin:
+
+* with job_names provided: ``python3 morph_resultsdb.py [job_names] --nvr name-version-release --test-tier 1``
+* without job_names: ``python3 morph_resultdsb.py --nvr name-version-release --test-tier 1``
