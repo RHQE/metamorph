@@ -4,6 +4,7 @@ import logging
 import logging.config
 import requests
 import json
+import time
 
 from lib.logging_conf import setup_logging
 
@@ -16,8 +17,9 @@ class ResultsDBApi(object):
     """
     Class to communicate and process data with resultsDB
     """
-
+    TIMEOUT_LIMIT = 7200  # Wait 2 hours maximally
     RESULTSDB_LIMITER = 10
+    MINUTE = 60  # 60 seconds
 
     def __init__(self, job_names, component_nvr, test_tier, resultsdb_api_url):
         self.resultsdb_api_url = resultsdb_api_url
@@ -65,12 +67,18 @@ class ResultsDBApi(object):
         for job_name in self.job_names:
             i = 0
             is_url = True
-            while is_url is not None:
+            while is_url is not None and self.TIMEOUT_LIMIT:
                 self.url_options['job_names'] = job_name
                 self.url_options['page'] = i
                 query_result = self.query_resultsdb(self.resultsdb_api_url, self.url_options)
-                self.job_names_result[job_name] += query_result['data']
-                is_url = query_result['next']
+                if query_result['data'] is []:
+                    logging.info("job name has not published results to resultsDB yet, sleeping...")
+                    time.sleep(self.MINUTE)  # Sleeping for 1 minute
+                    self.TIMEOUT_LIMIT -= self.MINUTE
+                else:
+                    self.job_names_result[job_name] += query_result['data']
+                    is_url = query_result['next']
+                    i += 1
         return self.job_names_result
 
     def get_jobs_by_nvr_and_tier(self, limit=10):
@@ -83,12 +91,17 @@ class ResultsDBApi(object):
         i = 0
         next_page = ""
         queried_data = []
-        while next_page is not None and i < limit:
+        while next_page is not None and self.TIMEOUT_LIMIT and limit > i:
             self.url_options['page'] = i
             response_data = self.query_resultsdb(self.resultsdb_api_url, self.url_options)
-            i += 1
-            next_page = response_data['next']
-            queried_data += response_data['data']
+            if response_data['data'] is []:
+                logging.info("job name has not published results to resultsDB yet, sleeping...")
+                time.sleep(self.MINUTE)  # Sleeping for 1 minute
+                self.TIMEOUT_LIMIT -= self.MINUTE
+            else:
+                i += 1
+                next_page = response_data['next']
+                queried_data += response_data['data']
         return queried_data
 
     @staticmethod
