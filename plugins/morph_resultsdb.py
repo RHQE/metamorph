@@ -2,9 +2,9 @@
 import argparse
 import logging
 import logging.config
-import requests
 import json
 import time
+import requests
 
 from lib.logging_conf import setup_logging
 
@@ -28,16 +28,18 @@ class ResultsDBApi(object):
         self.tier_tag = True
         self.url_options = {'CI_tier': test_tier, 'item': component_nvr}
 
-    def get_resultsdb_data(self):
+    def get_test_tier_metadata(self):
         """
         Method get_resultsdb_data it's the main function from which data are received
 
         :returns -- dictionary where keys are job names and their values are list of queried data
         """
         if self.job_names:
-            return self.get_job_names_result()
+            for job_name in self.job_names:
+                self.job_names_result[job_name] = self.get_resultsdb_data(job_name)
+            return self.job_names_result
         else:
-            queried_data = self.get_jobs_by_nvr_and_tier(self.RESULTSDB_LIMITER)
+            queried_data = self.get_resultsdb_data(limit=self.RESULTSDB_LIMITER)
             self.job_names_result = self.setup_output_data(queried_data)
             return self.job_names_result
 
@@ -51,50 +53,31 @@ class ResultsDBApi(object):
 
         :returns -- Queried data
         """
-        logging.debug("Running resultsbd API query with this url: {0} and options {1}".format(url, url_options))
+        logging.debug('Running resultsbd API query with this url: {0} and options {1}'.format(url, url_options))
         response = requests.get(url, params=url_options)
         if response.status_code >= 300:
             logging.error("ERROR: Unable to access resultsdb site.")
             raise ResultsDBApiException("ERROR: Unable to access resultsdb site.")
         return response.json()
 
-    def get_job_names_result(self):
+    def get_resultsdb_data(self, job_name="", limit=10):
         """
-        Method for getting data from resultsDB when job_names input was provided
+        Method for getting data from resultsDB
 
-        :returns -- dictionary where keys are job names and their values are list of queried data
-        """
-        for job_name in self.job_names:
-            i = 0
-            is_url = True
-            while is_url is not None and self.TIMEOUT_LIMIT:
-                self.url_options['job_names'] = job_name
-                self.url_options['page'] = i
-                query_result = self.query_resultsdb(self.resultsdb_api_url, self.url_options)
-                if query_result['data'] is []:
-                    logging.info("job name has not published results to resultsDB yet, sleeping...")
-                    time.sleep(self.MINUTE)  # Sleeping for 1 minute
-                    self.TIMEOUT_LIMIT -= self.MINUTE
-                else:
-                    self.job_names_result[job_name] += query_result['data']
-                    is_url = query_result['next']
-                    i += 1
-        return self.job_names_result
-
-    def get_jobs_by_nvr_and_tier(self, limit=10):
-        """
-        Method for getting data from resultsDB when only NVR and test_tier provided
-
+        :param self.url_options -- class dictionary of url options
+        :param job_name -- job name which will be searched in resultsDB
         :param limit -- Limit for amount of queried pages from resultsDB
         :returns -- List of queried data
         """
         i = 0
         next_page = ""
         queried_data = []
+        if job_name:
+            self.url_options['job_names'] = job_name
         while next_page is not None and self.TIMEOUT_LIMIT and limit > i:
             self.url_options['page'] = i
             response_data = self.query_resultsdb(self.resultsdb_api_url, self.url_options)
-            if response_data['data'] is []:
+            if not response_data['data']:
                 logging.info("job name has not published results to resultsDB yet, sleeping...")
                 time.sleep(self.MINUTE)  # Sleeping for 1 minute
                 self.TIMEOUT_LIMIT -= self.MINUTE
