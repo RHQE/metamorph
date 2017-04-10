@@ -43,19 +43,25 @@ class ResultsDBApi(object):
             self.job_names_result = self.setup_output_data(queried_data)
             return self.job_names_result
 
-    @staticmethod
-    def query_resultsdb(url, url_options=dict):
+    def query_resultsdb(self, url, url_options=dict, attempt=3):
         """
         This method queries resultsDB with given url and url_option variable
 
         :param url -- resultdb api url
         :param url_options -- dictionary of wanted options
+        :param attempt -- number of query tries if some problem occurs
 
         :returns -- Queried data
         """
         logging.debug('Running resultsbd API query with this url: {0} and options {1}'.format(url, url_options))
         response = requests.get(url, params=url_options)
-        if response.status_code >= 300:
+        if 300 <= response.status_code <= 400:
+            if attempt > 0:
+                time.sleep(self.MINUTE + self.MINUTE)  # Sleeping for two minutes
+                return self.query_resultsdb(url, url_options, attempt - 1)
+            else:
+                raise ResultsDBApiException("ERROR: Unable to access resultsdb site after 3 attempts")
+        elif response.status_code >= 400:
             logging.error("ERROR: Unable to access resultsdb site.")
             raise ResultsDBApiException("ERROR: Unable to access resultsdb site.")
         return response.json()
@@ -85,6 +91,8 @@ class ResultsDBApi(object):
                 i += 1
                 next_page = response_data['next']
                 queried_data += response_data['data']
+        if self.TIMEOUT_LIMIT == 0:
+            raise ResultsDBApiException("Timeout limit reached and no data were queried.")
         return queried_data
 
     @staticmethod
