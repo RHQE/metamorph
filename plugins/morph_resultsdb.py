@@ -4,6 +4,7 @@ import logging
 import logging.config
 import json
 import time
+import os
 import requests
 
 from lib.logging_conf import setup_logging
@@ -172,10 +173,16 @@ def parse_args():
     parser.add_argument("--resultsdb-api-url",
                         default="https://url.corp.redhat.com/resultdb",
                         help="Resultsdb api url from which job data will be queried.")
-    parser.add_argument("--nvr",
-                        type=str,
-                        required=True,
-                        help="NVR of tested component")
+    nvr = parser.add_mutually_exclusive_group(required=True)
+    nvr.add_argument("--nvr",
+                     type=str,
+                     help="NVR of tested component")
+    nvr.add_argument("--ci-message",
+                     type=str,
+                     help="Path to ci-message json file which contains nvr information")
+    nvr.add_argument("--env-variable",
+                     type=str,
+                     help="Name of environmental variable which contain nvr information")
     parser.add_argument("--test-tier",
                         type=str,
                         required=True,
@@ -188,9 +195,25 @@ def parse_args():
     return parser.parse_args()
 
 
+def get_nvr_information(args):
+    """
+    Function for parsing nvr information from given input
+    return value is set to args.nvr and it will be changed in args object.
+
+    :param args -- argparse object of parsed input variables
+    """
+    if args.ci_message:
+        with open(args.ci_message) as ci_message:
+            message_data = json.load(ci_message)
+        args.nvr = "{0}-{1}-{2}".format(message_data['package'], message_data['version'], message_data['release'])
+    elif args.env_variable:
+        args.nvr = os.getenv(args.env_variable, "UNKNOWN")
+
+
 def main():
     setup_logging(default_path="etc/logging.json")
     args = parse_args()
+    get_nvr_information(args)
     resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url)
     resultsdb.get_resultsdb_data()
     result = resultsdb.format_result()
