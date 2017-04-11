@@ -87,7 +87,6 @@ EXAMPLES = '''
     env-variable: "..."
     output: "hello.json"
   register: result
->>>>>>> Added support of different json output names.
 '''
 
 RETURN = '''
@@ -109,7 +108,8 @@ import logging
 import logging.config
 import time
 import os
-from lib.support_functions import setup_logging, storing_pretty_json
+
+from metamorph.lib.support_functions import setup_logging, storing_pretty_json
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -178,7 +178,7 @@ def main():
         ['env-variable', 'destination'],
         ['env-variable', 'count']
     ]
-    setup_logging(default_path="../../etc/logging.json")
+    setup_logging(default_path="metamorph/etc/logging.json")
     module = AnsibleModule(argument_spec=messagebus, mutually_exclusive=mutually_exclusive)
     error_message = ""
     ci_message = ""

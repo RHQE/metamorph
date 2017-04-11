@@ -48,7 +48,7 @@ CI-message metadata:
                                                      "version": "2.8.71"}}
 '''
 
-from lib.support_functions import setup_logging, read_json_file, storing_pretty_json
+from metamorph.lib.support_functions import setup_logging, read_json_file, storing_pretty_json
 import logging
 import json
 from ansible.module_utils.basic import AnsibleModule

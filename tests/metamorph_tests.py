@@ -1,5 +1,5 @@
 import unittest
-from plugins.morph_message_data_extractor import MessageDataExtractor
+from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
 
 
 class MyTestCase(unittest.TestCase):
@@ -44,3 +44,4 @@ class MyTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

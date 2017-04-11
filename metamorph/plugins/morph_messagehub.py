@@ -6,7 +6,7 @@ import time
 import os
 import stomp
 
-from lib.support_functions import setup_logging, storing_pretty_json
+from metamorph.lib.support_functions import setup_logging, storing_pretty_json
 
 
 def messagebus_run(args):
@@ -146,7 +146,7 @@ class CIListener(stomp.ConnectionListener):
 
 
 def main():
-    setup_logging(default_path="etc/logging.json")
+    setup_logging(default_path="metamorph/etc/logging.json")
     args = parse_args()
     try:
         args.func(args)
