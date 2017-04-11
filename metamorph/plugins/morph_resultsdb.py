@@ -8,7 +8,7 @@ import os
 
 import requests
 
-from metamorph.lib.support_functions import setup_logging, storing_pretty_json
+from metamorph.lib.support_functions import setup_logging, write_json_file
 
 
 class ResultsDBApiException(Exception):
@@ -240,7 +240,7 @@ def main():
     resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url, args.ca_bundle)
     resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
-    storing_pretty_json(dict(resultsdb=result), args.output)
+    write_json_file(dict(resultsdb=result), args.output)
 
 
 if __name__ == '__main__':

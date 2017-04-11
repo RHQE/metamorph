@@ -28,7 +28,7 @@ def setup_logging(default_path='logging.json', default_level=logging.INFO, env_k
         logging.basicConfig(level=default_level)
 
 
-def storing_pretty_json(input_data, output="metamorph.json"):
+def write_json_file(input_data, output="metamorph.json"):
     if os.path.isfile(output):
         with open(output) as existing_metamorph:
             existing_metadata = json.load(existing_metamorph)

@@ -102,7 +102,7 @@ import os
 
 import requests
 
-from metamorph.lib.support_functions import setup_logging, storing_pretty_json
+from metamorph.lib.support_functions import setup_logging, write_json_file
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -320,7 +320,7 @@ def main():
                              module.params['ca_bundle'])
     resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
-    storing_pretty_json(dict(resultsdb=result), module.params['output'])
+    write_json_file(dict(resultsdb=result), module.params['output'])
     module.exit_json(changed=True, meta=dict(result))
 
 if __name__ == '__main__':
