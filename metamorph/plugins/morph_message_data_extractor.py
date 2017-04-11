@@ -1,8 +1,9 @@
 #!/usr/bin/python
-from metamorph.lib.support_functions import setup_logging, read_json_file
 import argparse
 import logging
 import json
+
+from metamorph.lib.support_functions import setup_logging, read_json_file
 
 
 class MessageDataExtractor(object):

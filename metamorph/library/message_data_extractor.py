@@ -48,9 +48,10 @@ CI-message metadata:
                                                      "version": "2.8.71"}}
 '''
 
-from metamorph.lib.support_functions import setup_logging, read_json_file, storing_pretty_json
 import logging
 import json
+
+from metamorph.lib.support_functions import setup_logging, read_json_file, write_json_file
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -90,7 +91,12 @@ class MessageDataExtractor(object):
     def read_input_file(self):
         try:
             self.ci_message = read_json_file(self.ci_message_file)
-        except Exception as detail:
+        except FileNotFoundError as detail:
+            logging.debug("Failed to parse input json file because file was not found: {0} and traceback: {1}".format(
+                detail, detail.__traceback__))
+            raise CIMessageReadingException("Failed to parse input json file with because file was not found with "
+                                            "message: {}".format(detail))
+        except ValueError as detail:
             logging.debug("Failed to parse input json file with message: {0} and traceback: {1}".format(
                 detail, detail.__traceback__))
             raise CIMessageReadingException("Failed to parse input json file with message: {}".format(detail))
@@ -140,7 +146,7 @@ def main():
     with open(module.params['output'], "w") as metamorph:
         json.dump(ci_message_data, metamorph, indent=2)
 
-    storing_pretty_json(ci_message_data, module.params['output'])
+    write_json_file(ci_message_data, module.params['output'])
     module.exit_json(changed=True, meta=dict(messages=ci_message_data))
 
 
