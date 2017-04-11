@@ -5,6 +5,7 @@ import logging.config
 import json
 import time
 import os
+
 import requests
 
 from metamorph.lib.logging_conf import setup_logging
@@ -29,7 +30,7 @@ class ResultsDBApi(object):
         self.tier_tag = True
         self.url_options = {'CI_tier': test_tier, 'item': component_nvr}
 
-    def get_test_tier_metadata(self):
+    def get_test_tier_status_metadata(self):
         """
         Method get_resultsdb_data it's the main function from which data are received
 
@@ -41,10 +42,11 @@ class ResultsDBApi(object):
             return self.job_names_result
         else:
             queried_data = self.get_resultsdb_data(limit=self.RESULTSDB_LIMITER)
+            print(queried_data)
             self.job_names_result = self.setup_output_data(queried_data)
             return self.job_names_result
 
-    def query_resultsdb(self, url, url_options=dict, attempt=3):
+    def query_resultsdb(self, url, url_options=dict, attempt=0):
         """
         This method queries resultsDB with given url and url_option variable
 
@@ -54,18 +56,18 @@ class ResultsDBApi(object):
 
         :returns -- Queried data
         """
-        logging.debug('Running resultsbd API query with this url: {0} and options {1}'.format(url, url_options))
-        response = requests.get(url, params=url_options)
-        if 300 <= response.status_code <= 400:
-            if attempt > 0:
-                time.sleep(self.MINUTE + self.MINUTE)  # Sleeping for two minutes
-                return self.query_resultsdb(url, url_options, attempt - 1)
+        try:
+            response = requests.get(url, params=url_options)
+            response.raise_for_status()
+            return response.json()
+        except requests.HTTPError as detail:
+            if attempt < 3:
+                attempt += 1
+                time.sleep(self.MINUTE + self.MINUTE)
+                self.query_resultsdb(url, url_options, attempt)
             else:
-                raise ResultsDBApiException("ERROR: Unable to access resultsdb site after 3 attempts")
-        elif response.status_code >= 400:
-            logging.error("ERROR: Unable to access resultsdb site.")
-            raise ResultsDBApiException("ERROR: Unable to access resultsdb site.")
-        return response.json()
+                logging.error("ERROR: Unable to access resultsdb site.")
+                logging.error("ERROR: {0}".format(detail.args))
 
     def get_resultsdb_data(self, job_name="", limit=10):
         """
@@ -102,7 +104,7 @@ class ResultsDBApi(object):
         Method for setting up data from get_job_by_nvr_and_tier method.
         Data needs to be in dictionary where keys will be job names
 
-        :param resultsdb_data -- data from get_job_by_nvr_and_tier
+        :param resultsdb_data -- data which were queried without job_names option
         :returns -- dictionary where keys are job names and their values are list of queried data
         """
         formatted_output = {}
@@ -130,7 +132,7 @@ class ResultsDBApi(object):
 
     def format_job_name_result(self, job_name_result):
         """
-        Format's single job name data into dictionary
+        Formats single job name data into dictionary
 
         :param job_name_result -- list of single jenkins job queried data
         :returns -- Formatted single job data
@@ -215,7 +217,7 @@ def main():
     args = parse_args()
     get_nvr_information(args)
     resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url)
-    resultsdb.get_resultsdb_data()
+    resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
     with open(args.output, "w") as metamorph:
         json.dump(dict(result=result), metamorph, indent=2)
