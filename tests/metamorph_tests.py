@@ -1,6 +1,6 @@
 import unittest
 import json
-from plugins.morph_resultsdb import ResultsDBApi
+from metamorph.plugins.morph_resultsdb import ResultsDBApi
 
 
 class MyTestCase(unittest.TestCase):

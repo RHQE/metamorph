@@ -7,7 +7,7 @@ import time
 import os
 import requests
 
-from lib.logging_conf import setup_logging
+from metamorph.lib.logging_conf import setup_logging
 
 
 class ResultsDBApiException(Exception):
@@ -211,7 +211,7 @@ def get_nvr_information(args):
 
 
 def main():
-    setup_logging(default_path="etc/logging.json")
+    setup_logging(default_path="metamorph/etc/logging.json")
     args = parse_args()
     get_nvr_information(args)
     resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url)
