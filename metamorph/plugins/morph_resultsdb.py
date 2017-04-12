@@ -42,7 +42,6 @@ class ResultsDBApi(object):
             return self.job_names_result
         else:
             queried_data = self.get_resultsdb_data(limit=self.RESULTSDB_LIMITER)
-            print(queried_data)
             self.job_names_result = self.setup_output_data(queried_data)
             return self.job_names_result
 
@@ -110,7 +109,11 @@ class ResultsDBApi(object):
         """
         formatted_output = {}
         for single_job in resultsdb_data:
-            formatted_output[single_job['job_names']] += single_job
+            job_names_key = single_job['data'].get('job_names', ['UNKNOWN'])[0]
+            if job_names_key in formatted_output.keys():
+                formatted_output[job_names_key].append(single_job)
+            else:
+                formatted_output[job_names_key] = [single_job]
         return formatted_output
 
     def format_result(self):
@@ -221,7 +224,7 @@ def main():
     resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
     with open(args.output, "w") as metamorph:
-        json.dump(dict(result=result), metamorph, indent=2)
+        json.dump(dict(result), metamorph, indent=2)
 
 
 if __name__ == '__main__':
