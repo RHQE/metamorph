@@ -62,8 +62,9 @@ class ResultsDBApi(object):
             return response.json()
         except requests.HTTPError as detail:
             if attempt < 3:
+                logging.info("An exception occurred while querying resultsdb site. Trying again after one minute.")
                 attempt += 1
-                time.sleep(self.MINUTE + self.MINUTE)
+                time.sleep(self.MINUTE)
                 self.query_resultsdb(url, url_options, attempt)
             else:
                 logging.error("ERROR: Unable to access resultsdb site.")
