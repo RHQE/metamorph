@@ -40,11 +40,23 @@ class ResultsDBApi(object):
         if self.job_names:
             for job_name in self.job_names:
                 self.job_names_result[job_name] = self.get_resultsdb_data(job_name)
+            self.erase_duplicity_results()
             return self.job_names_result
         else:
             queried_data = self.get_resultsdb_data(limit=self.RESULTSDB_LIMITER)
             self.job_names_result = self.setup_output_data(queried_data)
+            self.erase_duplicity_results()
             return self.job_names_result
+
+    def erase_duplicity_results(self):
+        for job_name in self.job_names_result:
+            job_name_data = []
+            ref_urls = set()
+            for single_result in self.job_names_result[job_name]:
+                if single_result['ref_url'] not in ref_urls:
+                    job_name_data.append(single_result)
+                    ref_urls.add(single_result['ref_url'])
+            self.job_names_result[job_name] = job_name_data
 
     def query_resultsdb(self, url, url_options=dict, attempt=0):
         """
