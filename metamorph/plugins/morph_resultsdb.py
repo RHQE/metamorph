@@ -23,10 +23,11 @@ class ResultsDBApi(object):
     RESULTSDB_LIMITER = 10
     MINUTE = 60  # 60 seconds
 
-    def __init__(self, job_names, component_nvr, test_tier, resultsdb_api_url):
+    def __init__(self, job_names, component_nvr, test_tier, resultsdb_api_url, ca_bundle):
         self.resultsdb_api_url = resultsdb_api_url
         self.job_names = job_names
         self.job_names_result = {}
+        self.ca_bundle_path = ca_bundle
         self.tier_tag = True
         self.url_options = {'CI_tier': test_tier, 'item': component_nvr}
 
@@ -56,7 +57,7 @@ class ResultsDBApi(object):
         :returns -- Queried data
         """
         try:
-            response = requests.get(url, params=url_options)
+            response = requests.get(url, params=url_options, verify=self.ca_bundle_path)
             response.raise_for_status()
             return response.json()
         except requests.HTTPError as detail:
@@ -132,7 +133,7 @@ class ResultsDBApi(object):
             ci_tier['job_name'].append({single_job: self.format_job_name_result(self.job_names_result[single_job])})
         ci_tier['tier_tag'] = self.tier_tag
         result = {"tier": ci_tier}
-        return dict(result=result)
+        return dict(results=result)
 
     def format_job_name_result(self, job_name_result):
         """
@@ -177,8 +178,11 @@ def parse_args():
                         nargs="*",
                         help="Jenkins job name")
     parser.add_argument("--resultsdb-api-url",
-                        default="https://url.corp.redhat.com/resultdb",
+                        required=True,
                         help="Resultsdb api url from which job data will be queried.")
+    parser.add_argument('--ca-bundle',
+                        default='/etc/ssl/certs/ca-bundle.crt',
+                        help="Certificate bundle to verify resultsdb api url")
     nvr = parser.add_mutually_exclusive_group(required=True)
     nvr.add_argument("--nvr",
                      type=str,
@@ -218,9 +222,10 @@ def get_nvr_information(args):
 
 def main():
     setup_logging(default_path="metamorph/etc/logging.json")
+    logging.captureWarnings(True)
     args = parse_args()
     get_nvr_information(args)
-    resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url)
+    resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url, args.ca_bundle)
     resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
     with open(args.output, "w") as metamorph:
