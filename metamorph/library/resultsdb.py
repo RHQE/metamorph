@@ -43,6 +43,17 @@ options:
       - Output metadata file name where test tier status information will be stored.
     required: false
     default: metamorph.json
+
+  resultsdb_api_url:
+    description:
+      - Results api url of resultsDB
+    required: true
+
+  ca_bundle:
+    description:
+      - Path to certificate which verifies resultsDB api url.
+    required: false
+    default: /etc/ssl/certs/ca-bundle.crt
 '''
 
 EXAMPLES = '''
@@ -51,12 +62,14 @@ EXAMPLES = '''
     test_tier: 1
     nvr: "component-version-release"
     job_names: "..."
+    resultsdb_api_url: "..."
   register: result
 
 - name: Get test tier status by test tier and nvr
   resultsdb:
     test_tier: 1
     nvr: "component-version-release"
+    resultsdb_api_url: "..."
   register: result
 
 - name: Get test tier status by test tier, env_variable and store it into hello.json
@@ -64,6 +77,7 @@ EXAMPLES = '''
     test_tier: 1
     env_variable: "SOME_VAR"
     output: "hello.json"
+    resultsdb_api_url: "..."
   register: result
 '''
 
@@ -104,10 +118,11 @@ class ResultsDBApi(object):
     RESULTSDB_LIMITER = 10
     MINUTE = 60  # 60 seconds
 
-    def __init__(self, job_names, component_nvr, test_tier, resultsdb_api_url):
+    def __init__(self, job_names, component_nvr, test_tier, resultsdb_api_url, ca_bundle):
         self.resultsdb_api_url = resultsdb_api_url
         self.job_names = job_names
         self.job_names_result = {}
+        self.ca_bundle_path = ca_bundle
         self.tier_tag = True
         self.url_options = {'CI_tier': test_tier, 'item': component_nvr}
 
@@ -120,11 +135,23 @@ class ResultsDBApi(object):
         if self.job_names:
             for job_name in self.job_names:
                 self.job_names_result[job_name] = self.get_resultsdb_data(job_name)
+            self.erase_duplicity_results()
             return self.job_names_result
         else:
             queried_data = self.get_resultsdb_data(limit=self.RESULTSDB_LIMITER)
             self.job_names_result = self.setup_output_data(queried_data)
+            self.erase_duplicity_results()
             return self.job_names_result
+
+    def erase_duplicity_results(self):
+        for job_name in self.job_names_result:
+            job_name_data = []
+            ref_urls = set()
+            for single_result in self.job_names_result[job_name]:
+                if single_result['ref_url'] not in ref_urls:
+                    job_name_data.append(single_result)
+                    ref_urls.add(single_result['ref_url'])
+            self.job_names_result[job_name] = job_name_data
 
     def query_resultsdb(self, url, url_options=dict, attempt=0):
         """
@@ -137,7 +164,7 @@ class ResultsDBApi(object):
         :returns -- Queried data
         """
         try:
-            response = requests.get(url, params=url_options)
+            response = requests.get(url, params=url_options, verify=self.ca_bundle_path)
             response.raise_for_status()
             return response.json()
         except requests.HTTPError as detail:
@@ -213,7 +240,7 @@ class ResultsDBApi(object):
             ci_tier['job_name'].append({single_job: self.format_job_name_result(self.job_names_result[single_job])})
         ci_tier['tier_tag'] = self.tier_tag
         result = {"tier": ci_tier}
-        return dict(result=result)
+        return dict(results=result)
 
     def format_job_name_result(self, job_name_result):
         """
@@ -268,12 +295,13 @@ def get_nvr_information(module):
 def main():
     argument_spec = dict(
         job_names=dict(type='list', nargs='*'),
-        resultsdb_api_url=dict(default="https://url.corp.redhat.com/resultdb"),
+        resultsdb_api_url=dict(required=True, type='str'),
         nvr=dict(type='str'),
         ci_message=dict(type='str'),
         env_variable=dict(type='str'),
         test_tier=dict(type='int', required=True),
-        output=dict(default='metamorph.json', type='str')
+        output=dict(default='metamorph.json', type='str'),
+        ca_bundle=dict(default='/etc/ssl/certs/ca-bundle.crt', type='str')
     )
     mutually_exclusive = [
         ['nvr', 'ci_message'],
@@ -288,7 +316,8 @@ def main():
     resultsdb = ResultsDBApi(module.params['job_names'],
                              module.params['nvr'],
                              module.params['test_tier'],
-                             module.params['resultsdb_api_url'])
+                             module.params['resultsdb_api_url'],
+                             module.params['ca_bundle'])
     resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
     with open(module.params['output'], "w") as metamorph:

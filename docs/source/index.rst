@@ -49,10 +49,10 @@ Purpose of this plugin is to provide information whether component build should 
 
 How to run this plugin:
 
-* with job_names provided: ``python3 morph_resultsdb.py --nvr name-version-release --test-tier 1 [job_names]``
-* without job_names: ``python3 morph_resultdsb.py --nvr name-version-release --test-tier 1``
+* with job_names provided: ``python3 morph_resultsdb.py --nvr name-version-release --test-tier 1 --resultsdb-api-url resultsdb-url [job_names]``
+* without job_names: ``python3 morph_resultdsb.py --nvr name-version-release --test-tier 1 --resultsdb-api-url resultsdb-url``
 
 and how to run resultsdb ansible module:
 
-* with job_names provided: ``ansible <host> -m resultsdb -a "test_tier=1 nvr=name-version-release job_names=first-job,second-job"``
-* without job_names: ``ansible <host> -m resultsdb -a "test_tier=1 nvr=name-version-release"``
+* with job_names provided: ``ansible <host> -m resultsdb -a "test_tier=1 nvr=name-version-release job_names=first-job,second-job resultsdb_api_url=resultsdb-url"``
+* without job_names: ``ansible <host> -m resultsdb -a "test_tier=1 nvr=name-version-release resultsdb_api_url=resultsdb-url"``
