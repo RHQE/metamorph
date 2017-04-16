@@ -6,6 +6,7 @@ from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
 from metamorph.library.message_data_extractor import MessageDataExtractor as MessageDataExtractorAnsible
 from metamorph.plugins.morph_messagehub import env_run
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
+from metamorph.plugins.morph_pdc import PDCApi
 
 
 class SimpleClass(object):
@@ -160,6 +161,21 @@ class MyTestCase(unittest.TestCase):
         output = env_run(SimpleClass('TEST'))
         self.assertDictEqual(output, data_without_newlines)
     # End of messagehub testing section
+
+    def test_pdc_param_setup(self):
+        client = PDCApi("", "", "component-version-release")
+        output = {
+            "bugzilla-components": {"name": 'component'},
+            "global-components": {"name": 'component'},
+            "release-component-contacts": {"component": '^component$'},
+            "release-component-relationships": {"from_component_name": 'component'},
+            "release-components": {"name": 'component'},
+            "rpms": {"name": '^component$', "version": 'version', "release": 'release'},
+            "global-component-contacts": {"component": '^component$'}
+        }
+        client.setup_pdc_metadata_params("component", "version", "release")
+        self.assertDictEqual(client.pdc_name_mapping, output)
+
 
 if __name__ == '__main__':
     unittest.main()
