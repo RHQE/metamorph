@@ -32,4 +32,3 @@ def write_json_file(input_data, output="metamorph.json"):
 def read_json_file(input_file):
     with open(input_file, "r") as message:
         return json.load(message)
-
