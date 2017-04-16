@@ -9,5 +9,3 @@ install:
   - pip install -r requirements.txt
 script:
   - python tests/metamorph_tests.py -v
-
-
