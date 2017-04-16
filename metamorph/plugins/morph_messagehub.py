@@ -36,7 +36,7 @@ def messagebus_run(args):
     conn.disconnect()
     if listener.error_message:
         exit("Got error message through message bus {0}".format(listener.error_message))
-    storing_pretty_json(listener.metamorph_data[:args.count], args.output)
+    storing_pretty_json(dict(messages=listener.metamorph_data[:args.count]), args.output)
 
 
 def env_run(args):
@@ -44,7 +44,7 @@ def env_run(args):
     if env_data == "UNKNOWN":
         logging.error("Environmental variable not found")
         exit(1)
-    storing_pretty_json(env_data, args.output)
+    storing_pretty_json(dict(messages=env_data), args.output)
 
 
 def parse_args():
