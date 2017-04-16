@@ -26,4 +26,4 @@ def setup_logging(default_path='logging.json', default_level=logging.INFO, env_k
 
 def storing_pretty_json(input_data, output="metamorph.json"):
     with open(output, "w") as metamorph:
-        json.dump(dict(messages=input_data), metamorph, indent=2)
+        json.dump(input_data, metamorph, indent=2)
