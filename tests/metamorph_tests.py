@@ -77,6 +77,7 @@ class MyTestCase(unittest.TestCase):
         os.environ['TEST'] = data
         output = env_run(SimpleClass('TEST'))
         self.assertDictEqual(output, data_without_newlines)
+    # End of Messagehub testing section
 
     def test_data_extractor_check_fail2(self):
         message = {'message': {"weight": 0.2, "parent": None},
