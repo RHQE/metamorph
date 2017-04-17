@@ -40,3 +40,12 @@ Second variant is to use implemented ansible module:
 
 * for message: ``ansible <host> -m messagehub -a "user=<user> password=<password> host=<host>"``
 * for environmental  variable:  ``ansible <host> -m messagehub -a "env-variable=<environmental-variable>"``
+
+Metamorph for PDC
++++++++++++++++++
+Metamorph for pdc plugin extracts all possible metadata from pdc by providing component nvr.
+Product definition center (PDC) contains **Test provision metadata**, **Test run metadata** and **Test report metadata**
+This makes PDC a really important metadata storage and obviously **Metamorph** needs to provide them.
+
+How to execute metamorph for pdc:
+``python metamorph/plugins/morph_pdc.py --component-nvr <component-name-version-release> --pdc-api-url <pdc-api-url>``
