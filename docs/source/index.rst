@@ -66,3 +66,13 @@ and how to run resultsdb ansible module:
 
 * with job_names provided: ``ansible <host> -m resultsdb -a "test_tier=1 nvr=name-version-release job_names=first-job,second-job resultsdb_api_url=resultsdb-url"``
 * without job_names: ``ansible <host> -m resultsdb -a "test_tier=1 nvr=name-version-release resultsdb_api_url=resultsdb-url"``
+
+
+Metamorph for PDC
++++++++++++++++++
+Metamorph for pdc plugin extracts all possible metadata from pdc by providing component nvr.
+Product definition center (PDC) contains **Test provision metadata**, **Test run metadata** and **Test report metadata**
+This makes PDC a really important metadata storage and obviously **Metamorph** needs to provide them.
+
+How to execute metamorph for pdc:
+``python metamorph/plugins/morph_pdc.py --component-nvr <component-name-version-release> --pdc-api-url <pdc-api-url>``
