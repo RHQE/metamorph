@@ -5,7 +5,7 @@ import logging.config
 
 import requests
 
-from metamorph.lib.logging_conf import setup_logging, storing_pretty_json
+from metamorph.lib.support_functions import setup_logging, write_json_file
 
 
 class PDCApiException(Exception):
@@ -253,7 +253,7 @@ def main():
     args = parse_args()
     client = PDCApi(args.pdc_api_url, args.ca_cert, args.component_nvr)
     pdc_metadata = client.get_pdc_metadata_by_component_name()
-    storing_pretty_json(dict(pdc=dict(results=pdc_metadata)), args.output)
+    write_json_file(dict(pdc=dict(results=pdc_metadata)), args.output)
 
 if __name__ == '__main__':
     main()

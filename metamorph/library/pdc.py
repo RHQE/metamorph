@@ -71,7 +71,7 @@ import logging.config
 
 import requests
 
-from metamorph.lib.logging_conf import setup_logging, storing_pretty_json
+from metamorph.lib.support_functions import setup_logging, write_json_file
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -296,7 +296,7 @@ def main():
     module = AnsibleModule(argument_spec=pdc_arguments)
     client = PDCApi(module.params['pdc-api-url'], module.params['ca-cert'], module.params['component-nvr'])
     pdc_metadata = client.get_pdc_metadata_by_component_name()
-    storing_pretty_json(dict(pdc=dict(results=pdc_metadata)), module.params['output'])
+    write_json_file(dict(pdc=dict(results=pdc_metadata)), module.params['output'])
     module.exit_json(changed=True, meta=dict(pdc=pdc_metadata))
 
 if __name__ == '__main__':
