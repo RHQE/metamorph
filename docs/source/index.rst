@@ -89,4 +89,3 @@ Easiest way to run this plugin is by:
 ``python3 message_data_extractor ci_message.json``
 
 Extracted data are stored in json file.
-
