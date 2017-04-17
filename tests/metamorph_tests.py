@@ -57,7 +57,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(extractor.check_valid_ci_message(), False)
     # End of message data extractor tests
 
-    # Messagehub testing section 
+    # Messagehub testing section
     def test_env_message_part(self):
         data = {"old": "OPEN", "new": "FAILED", "attribute": "state"}
         os.environ['TEST'] = json.dumps(data)
