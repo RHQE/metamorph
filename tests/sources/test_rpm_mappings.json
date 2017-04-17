@@ -1,0 +1,54 @@
+{
+  "release-components": [
+        {
+          "active": true,
+          "type": "rpm",
+          "release": {
+            "release_id": "rhel-7.1",
+            "active": true
+          },
+          "name": "bash-completion",
+          "dist_git_branch": "rhel-7.1",
+          "global_component": "bash-completion"
+        },
+        {
+          "active": true,
+          "type": "rpm",
+          "release": {
+            "release_id": "rhel-7.0",
+            "active": true
+          },
+          "name": "bash-completion",
+          "dist_git_branch": "rhel-7.0",
+          "global_component": "bash-completion"
+        }
+  ],
+  "rpms": [
+        {
+          "id": 0,
+          "name": "bash-completion",
+          "linked_composes": [
+            "RHEL-7.1-some-data",
+            "RHEL-7.1-some-data"
+          ],
+          "epoch": 1,
+          "version": "2.1",
+          "built_for_release": null,
+          "linked_releases": [],
+          "release": "6.el7"
+        },
+    {
+          "id": 0,
+          "name": "bash-completion",
+          "linked_composes": [
+            "RHEL-7.0-some-data",
+            "RHEL-7.1-some-data"
+          ],
+          "epoch": 1,
+          "version": "2.1",
+          "built_for_release": null,
+          "linked_releases": [],
+          "release": "6.el7"
+        }
+  ]
+}
