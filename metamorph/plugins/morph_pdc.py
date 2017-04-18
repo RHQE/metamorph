@@ -134,9 +134,9 @@ class PDCApi(object):
             response.raise_for_status()
             return response.json()
         except requests.HTTPError as detail:
-            logging.error("Unsuccessful connection to pdc api url "
-                          "with url=\"{0}\" and options=\"{1}\"".format(url, url_options))
-            raise PDCApiException("Unsuccessful connection to pdc api url with detail= \"{}\"".format(detail))
+            logging.error('Unsuccessful connection to pdc api url '
+                          'with url="{0}" and options="{1}"'.format(url, url_options))
+            raise PDCApiException('Unsuccessful connection to pdc api url with detail= "{}"'.format(detail))
 
     def setup_pdc_metadata_params(self, name, version, release):
         """
@@ -146,8 +146,7 @@ class PDCApi(object):
         :param release -- Component release
         """
         for pdc_metadata_type in self.pdc_name_mapping:
-            for param in self.pdc_name_mapping[pdc_metadata_type]:
-                param_value = self.pdc_name_mapping[pdc_metadata_type][param]
+            for param, param_value in self.pdc_name_mapping[pdc_metadata_type].items():
                 self.pdc_name_mapping[pdc_metadata_type][param] = param_value.format(self.get_param_value(param,
                                                                                                           name,
                                                                                                           version,
