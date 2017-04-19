@@ -67,3 +67,5 @@ This makes PDC a really important metadata storage and obviously **Metamorph** n
 How to execute metamorph for pdc:
 ``python metamorph/plugins/morph_pdc.py --component-nvr <component-name-version-release> --pdc-api-url <pdc-api-url>``
 
+Execution pdc ansible module:
+``ansible <host> -m pdc -a "component-nvr=<component-name-version-release> pdc-api-url=<pdc-api-url>"``
