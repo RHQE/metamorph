@@ -18,7 +18,7 @@
       "id": 6076,
       "note": null,
       "outcome": "PASSED",
-      "ref_url": "http://someursl/864/console",
+      "ref_url": "http://someurl/864/console",
       "submit_time": "2017-03-26T10:01:28.265406",
       "testcase": {
         "href": "https://someurl.com/api/v2.0/",
