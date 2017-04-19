@@ -16,7 +16,7 @@ options:
     required: true
 
   pdc-api-url:
-    description:
+    description: 
       - PDC api url
     required: true
 
