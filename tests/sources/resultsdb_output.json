@@ -1,0 +1,59 @@
+{"data": [{"data": {
+        "item": [
+          "setup-2.8.71-5.el7_1"
+        ],
+        "recipients": [
+          "qe-baseos-automation",
+          "jscotka",
+          "ovasik"
+        ],
+        "type": [
+          "koji_build"
+        ]
+      },
+      "groups": [
+        "d8eaebb0-d9ab-467a-91d0-d433229019b2"
+      ],
+      "href": "some/6076",
+      "id": 6076,
+      "note": null,
+      "outcome": "PASSED",
+      "ref_url": "http://someurl/864/console",
+      "submit_time": "2017-03-26T10:01:28.265406",
+      "testcase": {
+        "href": "https://someurl.com/api/v2.0/",
+        "name": "baseos.ci-setup-brew-rhel-7.1-z-candidate-2-runtest",
+        "ref_url": "https://someurl.com/api/v2.0/"
+      },
+      "job_names": "ci-setup-brew-rhel-7.1-z-candidate-2-runtest"
+    },
+    {
+      "data": {
+        "item": [
+          "setup-2.8.71-5.el7_1"
+        ],
+        "recipients": [
+          "qe-baseos-automation",
+          "jscotka",
+          "ovasik"
+        ],
+        "type": [
+          "koji_build"
+        ]
+      },
+      "groups": [
+        "133843e9-b8f0-4b9a-8f15-569c9ad59ee6"
+      ],
+      "href": "some/6073",
+      "id": 6073,
+      "note": null,
+      "outcome": "PASSED",
+      "ref_url": "http://someurl/864/console",
+      "submit_time": "2017-03-26T10:01:28.265406",
+      "testcase": {
+        "href": "https://someurl.com/api/v2.0/",
+        "name": "baseos.ci-setup-brew-rhel-7.1-z-candidate-2-runtest",
+        "ref_url": "https://someurl.com/api/v2.0/"
+      },
+      "job_names": "ci-setup-brew-rhel-7.1-z-candidate-2-runtest"
+    }]}
