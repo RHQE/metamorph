@@ -6,7 +6,7 @@ import time
 import os
 import stomp
 
-from metamorph.lib.logging_conf import setup_logging, storing_pretty_json
+from metamorph.lib.support_functions import setup_logging, storing_pretty_json
 
 
 def messagebus_run(args):
