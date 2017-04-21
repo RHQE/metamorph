@@ -8,7 +8,7 @@ import os
 
 import requests
 
-from metamorph.lib.logging_conf import setup_logging
+from metamorph.lib.support_functions import setup_logging
 
 
 class ResultsDBApiException(Exception):
