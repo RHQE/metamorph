@@ -41,6 +41,7 @@ Second variant is to use implemented ansible module:
 * for message: ``ansible <host> -m messagehub -a "user=<user> password=<password> host=<host>"``
 * for environmental  variable:  ``ansible <host> -m messagehub -a "env-variable=<environmental-variable>"``
 
+
 Message data extractor
 ++++++++++++++++++++++
 The aim of this plugin is to extract important metadata from CI messages like target, owners, release information and many more.
@@ -50,3 +51,18 @@ Easiest way to run this plugin is by:
 
 Extracted data are stored in json file.
 
+
+Test tier status
+++++++++++++++++
+Purpose of this plugin is to provide information whether component build should be tagged with test tier number or not.
+**Test tier status** plugin queries data from resultsDB and after metadata aggregation decides whether component build should be tagged or not.
+
+How to run this plugin:
+
+* with job_names provided: ``python3 morph_resultsdb.py --nvr name-version-release --test-tier 1 --resultsdb-api-url resultsdb-url [job_names]``
+* without job_names: ``python3 morph_resultdsb.py --nvr name-version-release --test-tier 1 --resultsdb-api-url resultsdb-url``
+
+and how to run resultsdb ansible module:
+
+* with job_names provided: ``ansible <host> -m resultsdb -a "test_tier=1 nvr=name-version-release job_names=first-job,second-job resultsdb_api_url=resultsdb-url"``
+* without job_names: ``ansible <host> -m resultsdb -a "test_tier=1 nvr=name-version-release resultsdb_api_url=resultsdb-url"``
