@@ -128,6 +128,7 @@ class MyTestCase(unittest.TestCase):
         extractor.ci_message = message
         self.assertEqual(extractor.check_valid_ci_message(), False)
 
+    # resultsDB tests
     def test_resultdb_output(self):
         resultsdb = ResultsDBApi("", "", "", "", "")
         with open("./tests/sources/resultsdb_output.json") as resultsdb_output:
@@ -148,6 +149,7 @@ class MyTestCase(unittest.TestCase):
     def test_resultdb_query(self):
         resultsdb = ResultsDBApi("", "kernel-3.10.0-632.el7", "1", "https://url.corp.redhat.com/resultdb2", "")
         self.assertEqual(len(resultsdb.get_resultsdb_data()), 200)
+    # End of resultsDB tests
 
     # Messagehub testing section
     def test_env_message_part(self):
