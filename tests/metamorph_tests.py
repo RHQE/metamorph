@@ -11,6 +11,7 @@ class MyTestCase(unittest.TestCase):
     def test_something(self):
         self.assertEqual(True, True)
 
+    # resultsDB tests
     def test_resultdb_output(self):
         resultsdb = ResultsDBApi("", "", "", "", "")
         with open("./tests/sources/resultsdb_output.json") as resultsdb_output:
@@ -31,6 +32,7 @@ class MyTestCase(unittest.TestCase):
     def test_resultdb_query(self):
         resultsdb = ResultsDBApi("", "kernel-3.10.0-632.el7", "1", "https://url.corp.redhat.com/resultdb2", "")
         self.assertEqual(len(resultsdb.get_resultsdb_data()), 200)
+    # End of resultsDB tests
 
     # PDC tests
     def test_pdc_param_setup(self):
