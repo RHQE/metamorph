@@ -7,5 +7,6 @@ python:
 install:
   - python setup.py install
   - pip install requests
+  - pip install GitPython
 script:
   - python tests/metamorph_tests.py -v
