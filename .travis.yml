@@ -4,7 +4,7 @@ python:
   - "3.5"
   - "3.6"
 install:
-  - python setup.py install
+  - python setup.py install 
   - pip install -r requirements.txt
 script:
   - python tests/metamorph_tests.py -v
