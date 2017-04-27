@@ -1,0 +1,7 @@
+- project:
+    name: some name
+    jobs: 'job_name'
+    info:
+        - something:
+            source_count: 3
+            keypair: 'some_keypair'
