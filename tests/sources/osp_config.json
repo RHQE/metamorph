@@ -10,10 +10,10 @@
     "sites": [
         {
             "site": "ci-osp",
-            "endpoint": "",
-            "project": "",
-            "username": "",
-            "password": "",
+            "endpoint": "openstack_endpoint",
+            "project": "my_project",
+            "username": "Jurisak",
+            "password": "SuperSecretPassword",
             "keypair": "team-jenkins",
             "networks": ["team-jenkins"],
             "region": ""
