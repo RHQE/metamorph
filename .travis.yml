@@ -8,5 +8,6 @@ install:
   - python setup.py install
   - pip install requests
   - pip install GitPython
+  - pip install PyYaml
 script:
   - python tests/metamorph_tests.py -v
