@@ -8,7 +8,6 @@ from metamorph.plugins.morph_messagehub import env_run
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 from metamorph.plugins.morph_pdc import PDCApi
 from metamorph.library.pdc import PDCApi as PDCApiAnsible
-from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
 
 
 class SimpleClass(object):
@@ -254,7 +253,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTupleEqual(client.get_component_nvr(component), ('sec-name', 'version', 'release'))
         component = "first-sec-third-name-version-release"
         self.assertTupleEqual(client.get_component_nvr(component), ('first-sec-third-name', 'version', 'release'))
-    # End of PDC tests 
+    # End of PDC tests
 
 if __name__ == '__main__':
     unittest.main()
