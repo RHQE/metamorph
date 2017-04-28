@@ -3,8 +3,8 @@ import json
 import os
 
 from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
-from metamorph.plugins.morph_messagehub import env_run
 from metamorph.library.message_data_extractor import MessageDataExtractor as MessageDataExtractorAnsible
+from metamorph.plugins.morph_messagehub import env_run
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 from metamorph.plugins.morph_pdc import PDCApi
 from metamorph.library.pdc import PDCApi as PDCApiAnsible
@@ -55,6 +55,28 @@ class MyTestCase(unittest.TestCase):
         extractor = MessageDataExtractor(None)
         extractor.ci_message = message
         self.assertEqual(extractor.check_valid_ci_message(), False)
+    # End of message data extractor tests
+
+    # Messagehub testing section
+    def test_env_message_part(self):
+        data = {"old": "OPEN", "new": "FAILED", "attribute": "state"}
+        os.environ['TEST'] = json.dumps(data)
+        output = env_run(SimpleClass('TEST'))
+        self.assertDictEqual(output, data)
+
+    @unittest.skip("Travis CI does not have access to RH site.")
+    def test_resultdb_query(self):
+        resultsdb = ResultsDBApi("", "kernel-3.10.0-632.el7", "1", "https://url.corp.redhat.com/resultdb2", "")
+        self.assertEqual(len(resultsdb.get_resultsdb_data()), 200)
+    # End of message data extractor tests
+
+    # Messagehub testing section
+    def test_env_message_part_with_newlines(self):
+        data = '{\n"old": \n"OPEN", \n"new": \n"FAILED", \n"attribute": \n"state"}'
+        data_without_newlines = {"old": "OPEN", "new": "FAILED", "attribute": "state"}
+        os.environ['TEST'] = data
+        output = env_run(SimpleClass('TEST'))
+        self.assertDictEqual(output, data_without_newlines)
 
     def test_data_extractor_check_fail2(self):
         message = {'message': {"weight": 0.2, "parent": None},
@@ -149,21 +171,6 @@ class MyTestCase(unittest.TestCase):
         resultsdb = ResultsDBApi("", "kernel-3.10.0-632.el7", "1", "https://url.corp.redhat.com/resultdb2", "")
         self.assertEqual(len(resultsdb.get_resultsdb_data()), 200)
     # End of resultsDB tests
-
-    # Messagehub testing section
-    def test_env_message_part(self):
-        data = {"old": "OPEN", "new": "FAILED", "attribute": "state"}
-        os.environ['TEST'] = json.dumps(data)
-        output = env_run(SimpleClass('TEST'))
-        self.assertDictEqual(output, data)
-
-    def test_env_message_part_with_newlines(self):
-        data = '{\n"old": \n"OPEN", \n"new": \n"FAILED", \n"attribute": \n"state"}'
-        data_without_newlines = {"old": "OPEN", "new": "FAILED", "attribute": "state"}
-        os.environ['TEST'] = data
-        output = env_run(SimpleClass('TEST'))
-        self.assertDictEqual(output, data_without_newlines)
-    # End of messagehub testing section
 
     # PDC tests
     def test_pdc_param_setup(self):
