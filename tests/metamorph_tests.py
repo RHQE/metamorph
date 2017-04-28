@@ -2,8 +2,8 @@ import unittest
 import json
 import os
 
-from metamorph.plugins.morph_messagehub import env_run
 from metamorph.library.message_data_extractor import MessageDataExtractor as MessageDataExtractorAnsible
+from metamorph.plugins.morph_messagehub import env_run
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 from metamorph.plugins.morph_pdc import PDCApi
 from metamorph.library.pdc import PDCApi as PDCApiAnsible
@@ -180,6 +180,13 @@ class MyTestCase(unittest.TestCase):
         output = env_run(SimpleClass('TEST'))
         self.assertDictEqual(output, data)
 
+    def test_env_message_part_with_newlines(self):
+        data = '{\n"old": \n"OPEN", \n"new": \n"FAILED", \n"attribute": \n"state"}'
+        data_without_newlines = {"old": "OPEN", "new": "FAILED", "attribute": "state"}
+        os.environ['TEST'] = data
+        output = env_run(SimpleClass('TEST'))
+        self.assertDictEqual(output, data_without_newlines)
+
     @unittest.skip("Travis CI does not have access to RH site.")
     def test_resultdb_query(self):
         resultsdb = ResultsDBApi("", "kernel-3.10.0-632.el7", "1", "https://url.corp.redhat.com/resultdb2", "")
@@ -261,13 +268,6 @@ class MyTestCase(unittest.TestCase):
         resultsdb = ResultsDBApi("", "kernel-3.10.0-632.el7", "1", "https://url.corp.redhat.com/resultdb2", "")
         self.assertEqual(len(resultsdb.get_resultsdb_data()), 200)
 
-    def test_env_message_part_with_newlines(self):
-        data = '{\n"old": \n"OPEN", \n"new": \n"FAILED", \n"attribute": \n"state"}'
-        data_without_newlines = {"old": "OPEN", "new": "FAILED", "attribute": "state"}
-        os.environ['TEST'] = data
-        output = env_run(SimpleClass('TEST'))
-        self.assertDictEqual(output, data_without_newlines)
-    # End of messagehub testing section
 
 if __name__ == '__main__':
     unittest.main()
