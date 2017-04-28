@@ -186,7 +186,7 @@ class MyTestCase(unittest.TestCase):
         os.environ['TEST'] = data
         output = env_run(SimpleClass('TEST'))
         self.assertDictEqual(output, data_without_newlines)
-    # End of Messagehub testing section
+    # End of Messagehub testing section 
 
     @unittest.skip("Travis CI does not have access to RH site.")
     def test_resultdb_query(self):
