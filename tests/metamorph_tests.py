@@ -7,6 +7,7 @@ from metamorph.library.message_data_extractor import MessageDataExtractor as Mes
 from metamorph.plugins.morph_messagehub import env_run
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 from metamorph.plugins.morph_pdc import PDCApi
+from metamorph.library.pdc import PDCApi as PDCApiAnsible
 
 
 class SimpleClass(object):
@@ -162,6 +163,7 @@ class MyTestCase(unittest.TestCase):
         self.assertDictEqual(output, data_without_newlines)
     # End of messagehub testing section
 
+    # PDC tests
     def test_pdc_param_setup(self):
         client = PDCApi("", "", "component-version-release")
         output = {
@@ -182,6 +184,74 @@ class MyTestCase(unittest.TestCase):
             pdc_data = json.load(rpm_mapping_input)
         output = {'rhel-7.1', 'rhel-7.0'}
         self.assertSetEqual(client.get_release_ids(pdc_data['release-components'], pdc_data['rpms']), output)
+
+    def test_release_id_to_compose_getter(self):
+        compose = "COMPONENT-9-xxx"
+        client = PDCApi("", "", "component-version-release")
+        release = client.get_release_id_from_compose(compose)
+        self.assertEqual(release, 'component-9')
+
+    def test_get_release_ids(self):
+        release_components = [{"release": {"release_id": "component-9.0"}},
+                              {"release": {"release_id": "component-9.1"}}]
+        rpms = [{"linked_composes": ["COMPONENT-9.0-xxx", "COMPONENT-9.0-xxx"]},
+                {"linked_composes": ["COMPONENT-9.1-xxx", "COMPONENT-9.1-xxx"]}]
+        client = PDCApi("", "", "component-version-release")
+        self.assertSetEqual(client.get_release_ids(release_components, rpms), {'component-9.0', 'component-9.1'})
+
+    def test_component_nvr(self):
+        client = PDCApi("", "", "component-version-release")
+        component = "name-version-release"
+        self.assertTupleEqual(client.get_component_nvr(component), ('name', 'version', 'release'))
+        component = "sec-name-version-release"
+        self.assertTupleEqual(client.get_component_nvr(component), ('sec-name', 'version', 'release'))
+        component = "first-sec-third-name-version-release"
+        self.assertTupleEqual(client.get_component_nvr(component), ('first-sec-third-name', 'version', 'release'))
+
+    def test_pdc_param_setup_ansible(self):
+        client = PDCApiAnsible("", "", "component-version-release")
+        output = {
+            "bugzilla-components": {"name": 'component'},
+            "global-components": {"name": 'component'},
+            "release-component-contacts": {"component": '^component$'},
+            "release-component-relationships": {"from_component_name": 'component'},
+            "release-components": {"name": 'component'},
+            "rpms": {"name": '^component$', "version": 'version', "release": 'release'},
+            "global-component-contacts": {"component": '^component$'}
+        }
+        client.setup_pdc_metadata_params("component", "version", "release")
+        self.assertDictEqual(client.pdc_name_mapping, output)
+
+    def test_pdc_rpm_mappings_ansible(self):
+        client = PDCApiAnsible("", "", "bash-completion-version-release")
+        with open("./tests/sources/test_rpm_mappings.json") as rpm_mapping_input:
+            pdc_data = json.load(rpm_mapping_input)
+        output = {'rhel-7.1', 'rhel-7.0'}
+        self.assertSetEqual(client.get_release_ids(pdc_data['release-components'], pdc_data['rpms']), output)
+
+    def test_release_id_to_compose_getter_ansible(self):
+        compose = "COMPONENT-9-xxx"
+        client = PDCApiAnsible("", "", "component-version-release")
+        release = client.get_release_id_from_compose(compose)
+        self.assertEqual(release, 'component-9')
+
+    def test_get_release_ids_ansible(self):
+        release_components = [{"release": {"release_id": "component-9.0"}},
+                              {"release": {"release_id": "component-9.1"}}]
+        rpms = [{"linked_composes": ["COMPONENT-9.0-xxx", "COMPONENT-9.0-xxx"]},
+                {"linked_composes": ["COMPONENT-9.1-xxx", "COMPONENT-9.1-xxx"]}]
+        client = PDCApiAnsible("", "", "component-version-release")
+        self.assertSetEqual(client.get_release_ids(release_components, rpms), {'component-9.0', 'component-9.1'})
+
+    def test_component_nvr_ansible(self):
+        client = PDCApiAnsible("", "", "component-version-release")
+        component = "name-version-release"
+        self.assertTupleEqual(client.get_component_nvr(component), ('name', 'version', 'release'))
+        component = "sec-name-version-release"
+        self.assertTupleEqual(client.get_component_nvr(component), ('sec-name', 'version', 'release'))
+        component = "first-sec-third-name-version-release"
+        self.assertTupleEqual(client.get_component_nvr(component), ('first-sec-third-name', 'version', 'release'))
+    # End of PDC tests
 
 
 if __name__ == '__main__':
