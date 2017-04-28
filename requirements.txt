@@ -1,3 +1,4 @@
 ansible
 requests
-stomp
+stomp.py
+
