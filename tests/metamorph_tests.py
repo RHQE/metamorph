@@ -3,8 +3,8 @@ import json
 import os
 
 from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
-from metamorph.library.message_data_extractor import MessageDataExtractor as MessageDataExtractorAnsible
 from metamorph.plugins.morph_messagehub import env_run
+from metamorph.library.message_data_extractor import MessageDataExtractor as MessageDataExtractorAnsible
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 from metamorph.plugins.morph_pdc import PDCApi
 from metamorph.library.pdc import PDCApi as PDCApiAnsible
