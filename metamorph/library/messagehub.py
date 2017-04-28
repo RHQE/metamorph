@@ -108,6 +108,7 @@ import logging
 import logging.config
 import time
 import os
+import json
 
 from metamorph.lib.logging_conf import setup_logging, storing_pretty_json
 from ansible.module_utils.basic import AnsibleModule
@@ -187,6 +188,12 @@ def main():
         if ci_message == "UNKNOWN":
             logging.error("Environmental variable not found")
             error_message = "Environmental variable not found"
+        # Need to erase \n in given message. They will cause parsing errors otherwise.
+        try:
+            ci_message = json.loads(ci_message.replace('\\n', ''))
+        except ValueError as detail:
+            module.fail_json(msg="Error occurred during json parsing from given environmental variable. "
+                                 "See detail: '{}'".format(detail))
     elif not (module.params['user'] and module.params['password'] and module.params['host']):
         module.fail_json(msg="Error in argument parsing. Arguments: user, password and host are required")
     else:
