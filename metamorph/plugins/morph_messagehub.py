@@ -6,7 +6,8 @@ import time
 import os
 import stomp
 
-from metamorph.lib.logging_conf import setup_logging, storing_pretty_json
+from metamorph.lib.logging_conf import setup_logging
+from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 def messagebus_run(args):
@@ -36,7 +37,7 @@ def messagebus_run(args):
     conn.disconnect()
     if listener.error_message:
         exit("Got error message through message bus {0}".format(listener.error_message))
-    storing_pretty_json(listener.metamorph_data[:args.count], args.output)
+    return listener.metamorph_data[:args.count]
 
 
 def env_run(args):
@@ -44,7 +45,7 @@ def env_run(args):
     if env_data == "UNKNOWN":
         logging.error("Environmental variable not found")
         exit(1)
-    storing_pretty_json(env_data, args.output)
+    return env_data
 
 
 def parse_args():
@@ -149,7 +150,8 @@ def main():
     setup_logging(default_path="metamorph/etc/logging.json")
     args = parse_args()
     try:
-        args.func(args)
+        ci_message = args.func(args)
+        MetamorphPlugin.storing_pretty_json(ci_message, args.output)
     except Exception as exc:
         if "\'Namespace\' object has no attribute \'func\'".startswith(exc.__str__()):
             logging.warning("You need to specify input. Please run: \"morph_messagehub.py --help\" "

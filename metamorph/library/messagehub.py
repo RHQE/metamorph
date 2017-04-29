@@ -109,7 +109,8 @@ import logging.config
 import time
 import os
 
-from metamorph.lib.logging_conf import setup_logging, storing_pretty_json
+from metamorph.lib.logging_conf import setup_logging
+from metamorph.metamorph_plugin import MetamorphPlugin
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -193,7 +194,7 @@ def main():
         error_message, ci_message = messagebus_run(module)
 
     if not error_message:
-        storing_pretty_json(ci_message, module.params['output'])
+        MetamorphPlugin.storing_pretty_json(ci_message, module.params['output'])
         module.exit_json(changed=True, meta=dict(messages=ci_message))
     else:
         module.fail_json(msg="Error occurred in processing CI Message.", meta=error_message)
