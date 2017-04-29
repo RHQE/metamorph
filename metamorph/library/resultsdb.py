@@ -295,7 +295,7 @@ def main():
                              module.params['ca_bundle'])
     resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
-    resultsdb.storing_pretty_json(dict(resultsDB=result), module.params['output'])
+    resultsdb.write_json_file(dict(resultsDB=result), module.params['output'])
     module.exit_json(changed=True, meta=dict(result))
 
 if __name__ == '__main__':

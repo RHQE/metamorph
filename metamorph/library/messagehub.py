@@ -201,7 +201,7 @@ def main():
         error_message, ci_message = messagebus_run(module)
 
     if not error_message:
-        MetamorphPlugin.storing_pretty_json(ci_message, module.params['output'])
+        MetamorphPlugin.write_json_file(ci_message, module.params['output'])
         module.exit_json(changed=True, meta=dict(messages=ci_message))
     else:
         module.fail_json(msg="Error occurred in processing CI Message.", meta=error_message)

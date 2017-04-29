@@ -215,7 +215,7 @@ def main():
     resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url, args.ca_bundle)
     resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
-    resultsdb.storing_pretty_json(dict(resultsDB=result), args.output)
+    resultsdb.write_json_file(dict(resultsDB=result), args.output)
 
 if __name__ == '__main__':
     main()
