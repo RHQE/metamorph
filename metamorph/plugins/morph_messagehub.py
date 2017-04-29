@@ -7,7 +7,8 @@ import os
 import stomp
 import json
 
-from metamorph.lib.support_functions import setup_logging, write_json_file
+from metamorph.lib.support_functions import setup_logging
+from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 def messagebus_run(args):
@@ -153,7 +154,7 @@ def main():
     args = parse_args()
     try:
         ci_message = args.func(args)
-        write_json_file(ci_message, args.output)
+        MetamorphPlugin.storing_pretty_json(ci_message, args.output)
     except Exception as exc:
         if "\'Namespace\' object has no attribute \'func\'".startswith(exc.__str__()):
             logging.warning("You need to specify input. Please run: \"morph_messagehub.py --help\" "

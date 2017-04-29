@@ -6,24 +6,23 @@ import json
 import time
 import os
 
-import requests
-
 from metamorph.lib.support_functions import setup_logging
+from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 class ResultsDBApiException(Exception):
     pass
 
 
-class ResultsDBApi(object):
+class ResultsDBApi(MetamorphPlugin):
     """
     Class to communicate and process data with resultsDB
     """
     TIMEOUT_LIMIT = 7200  # Wait 2 hours maximally
     RESULTSDB_LIMITER = 10
-    MINUTE = 60  # 60 seconds
 
     def __init__(self, job_names, component_nvr, test_tier, resultsdb_api_url, ca_bundle):
+        super().__init__()
         self.resultsdb_api_url = resultsdb_api_url
         self.job_names = job_names
         self.job_names_result = {}
@@ -57,30 +56,6 @@ class ResultsDBApi(object):
                     job_name_data.append(single_result)
                     ref_urls.add(single_result['ref_url'])
             self.job_names_result[job_name] = job_name_data
-
-    def query_resultsdb(self, url, url_options=dict, attempt=0):
-        """
-        This method queries resultsDB with given url and url_option variable
-
-        :param url -- resultdb api url
-        :param url_options -- dictionary of wanted options
-        :param attempt -- number of query tries if some problem occurs
-
-        :returns -- Queried data
-        """
-        try:
-            response = requests.get(url, params=url_options, verify=self.ca_bundle_path)
-            response.raise_for_status()
-            return response.json()
-        except requests.HTTPError as detail:
-            if attempt < 3:
-                logging.info("An exception occurred while querying resultsdb site. Trying again after one minute.")
-                attempt += 1
-                time.sleep(self.MINUTE)
-                self.query_resultsdb(url, url_options, attempt)
-            else:
-                logging.error("ERROR: Unable to access resultsdb site.")
-                logging.error("ERROR: {0}".format(detail.args))
 
     def get_resultsdb_data(self, job_name="", limit=10):
         """
@@ -240,9 +215,7 @@ def main():
     resultsdb = ResultsDBApi(args.job_names, args.nvr, args.test_tier, args.resultsdb_api_url, args.ca_bundle)
     resultsdb.get_test_tier_status_metadata()
     result = resultsdb.format_result()
-    with open(args.output, "w") as metamorph:
-        json.dump(dict(result), metamorph, indent=2)
-
+    resultsdb.storing_pretty_json(dict(resultsDB=result), args.output)
 
 if __name__ == '__main__':
     main()
