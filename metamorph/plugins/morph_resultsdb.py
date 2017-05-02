@@ -95,7 +95,7 @@ class ResultsDBApi(object):
         next_page = ""
         queried_data = []
         if job_name:
-            self.url_options['job_names'] = job_name
+            self.url_options['job_name'] = job_name
         while next_page is not None and self.TIMEOUT_LIMIT and limit > i:
             self.url_options['page'] = i
             response_data = self.query_resultsdb(self.resultsdb_api_url, self.url_options)
@@ -117,12 +117,12 @@ class ResultsDBApi(object):
         Method for setting up data from get_job_by_nvr_and_tier method.
         Data needs to be in dictionary where keys will be job names
 
-        :param resultsdb_data -- data which were queried without job_names option
+        :param resultsdb_data -- data which were queried without job_name option
         :returns -- dictionary where keys are job names and their values are list of queried data
         """
         formatted_output = {}
         for single_job in resultsdb_data:
-            job_names_key = single_job['data'].get('job_names', ['UNKNOWN'])[0]
+            job_names_key = single_job['data'].get('job_name', ['UNKNOWN'])[0]
             if job_names_key in formatted_output.keys():
                 formatted_output[job_names_key].append(single_job)
             else:
