@@ -4,7 +4,6 @@ import os
 
 from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
 from metamorph.library.message_data_extractor import MessageDataExtractor as MessageDataExtractorAnsible
-from collections import namedtuple
 from metamorph.plugins.morph_messagehub import env_run
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 
