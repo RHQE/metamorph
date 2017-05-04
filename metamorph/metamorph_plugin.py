@@ -31,7 +31,7 @@ class MetamorphPlugin(object):
             with open(output, "w") as metamorph:
                 json.dump(dict(metamorph=input_data), metamorph, indent=2)
 
-    def query_resultsdb(self, url, url_options=dict, attempt=0, ca_cert='/etc/ssl/certs/ca-bundle.crt'):
+    def query_api(self, url, url_options=dict, attempt=0, ca_cert='/etc/ssl/certs/ca-bundle.crt'):
         """
         This method queries given url with url_option variable
 
@@ -52,7 +52,7 @@ class MetamorphPlugin(object):
                              "Trying again after one minute.".format(url))
                 attempt += 1
                 time.sleep(self.MINUTE)
-                self.query_resultsdb(url, url_options, attempt, ca_cert)
+                self.query_api(url, url_options, attempt, ca_cert)
             else:
                 logging.error("ERROR: Unable to access url '{0}' with given options '{1}'.".format(url, url_options))
                 logging.error("ERROR: {0}".format(detail.args))
