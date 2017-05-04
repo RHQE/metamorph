@@ -2,12 +2,12 @@ import unittest
 import json
 import os
 
-from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
 from metamorph.library.message_data_extractor import MessageDataExtractor as MessageDataExtractorAnsible
 from metamorph.plugins.morph_messagehub import env_run
 from metamorph.plugins.morph_resultsdb import ResultsDBApi
 from metamorph.plugins.morph_pdc import PDCApi
 from metamorph.library.pdc import PDCApi as PDCApiAnsible
+from metamorph.plugins.morph_message_data_extractor import MessageDataExtractor
 
 
 class SimpleClass(object):
@@ -39,22 +39,6 @@ class MyTestCase(unittest.TestCase):
         extractor.ci_message = message
         self.assertEqual(extractor.check_valid_ci_message(), True)
         self.assertEqual(extractor.get_build_data(), output)
-
-    def test_data_extractor_check_fail(self):
-        message = {'message': {"weight": 0.2, "parent": None},
-                   'header': {"owner": "jkulda",
-                              "scratch": "true",
-                              "method": "buildArch",
-                              "target": "rhel-7.1-candidate",
-                              "new": "CLOSED",
-                              "packages": "setup",
-                              "version": "2.8.71",
-                              "release": "5.el7_1"
-                              }
-                   }
-        extractor = MessageDataExtractor(None)
-        extractor.ci_message = message
-        self.assertEqual(extractor.check_valid_ci_message(), False)
     # End of message data extractor tests
 
     # Messagehub testing section
@@ -78,45 +62,6 @@ class MyTestCase(unittest.TestCase):
         output = env_run(SimpleClass('TEST'))
         self.assertDictEqual(output, data_without_newlines)
     # End of Messagehub testing section 
-
-    def test_data_extractor_check_fail2(self):
-        message = {'message': {"weight": 0.2, "parent": None},
-                   'header': {"owner": "jkulda",
-                              "scratch": "true",
-                              "method": "build",
-                              "target": "rhel-7.1-candidate",
-                              "new": "RUNNING",
-                              "packages": "setup",
-                              "version": "2.8.71",
-                              "release": "5.el7_1"
-                              }
-                   }
-        extractor = MessageDataExtractor(None)
-        extractor.ci_message = message
-        self.assertEqual(extractor.check_valid_ci_message(), False)
-
-    def test_data_extractor_pass_ansible(self):
-        message = {'message': {"weight": 0.2, "parent": None},
-                   'header': {"owner": "jkulda",
-                              "scratch": "true",
-                              "method": "build",
-                              "target": "rhel-7.1-candidate",
-                              "new": "CLOSED",
-                              "package": "setup",
-                              "version": "2.8.71",
-                              "release": "5.el7_1"
-                              }
-                   }
-        output = {'scratch': 'true',
-                  'version': '2.8.71',
-                  'owner': 'jkulda',
-                  'release': '5.el7_1',
-                  'package': 'setup',
-                  'target': 'rhel-7.1-candidate'}
-        extractor = MessageDataExtractorAnsible(None)
-        extractor.ci_message = message
-        self.assertEqual(extractor.check_valid_ci_message(), True)
-        self.assertEqual(extractor.get_build_data(), output)
 
     def test_data_extractor_check_fail_ansible(self):
         message = {'message': {"weight": 0.2, "parent": None},
@@ -166,11 +111,6 @@ class MyTestCase(unittest.TestCase):
             data = {'setup-2.8.71-5.el7_1': json.load(resultsdb_output)['data']}
         resultsdb.job_names_result = data
         self.assertRaises(KeyError, resultsdb.setup_output_data, [data])
-
-    @unittest.skip("Travis CI does not have access to RH site.")
-    def test_resultdb_query(self):
-        resultsdb = ResultsDBApi("", "kernel-3.10.0-632.el7", "1", "https://url.corp.redhat.com/resultdb2", "")
-        self.assertEqual(len(resultsdb.get_resultsdb_data()), 200)
     # End of resultsDB tests
 
     # PDC tests
@@ -252,6 +192,7 @@ class MyTestCase(unittest.TestCase):
                 {"linked_composes": ["COMPONENT-9.1-xxx", "COMPONENT-9.1-xxx"]}]
         client = PDCApiAnsible("", "", "component-version-release")
         self.assertSetEqual(client.get_release_ids(release_components, rpms), {'component-9.0', 'component-9.1'})
+    # End of resultsDB tests
 
     def test_component_nvr_ansible(self):
         client = PDCApiAnsible("", "", "component-version-release")
@@ -261,6 +202,63 @@ class MyTestCase(unittest.TestCase):
         self.assertTupleEqual(client.get_component_nvr(component), ('sec-name', 'version', 'release'))
         component = "first-sec-third-name-version-release"
         self.assertTupleEqual(client.get_component_nvr(component), ('first-sec-third-name', 'version', 'release'))
+    # End of PDC tests
+
+    def test_data_extractor_check_fail(self):
+        message = {'message': {"weight": 0.2, "parent": None},
+                   'header': {"owner": "jkulda",
+                              "scratch": "true",
+                              "method": "buildArch",
+                              "target": "rhel-7.1-candidate",
+                              "new": "CLOSED",
+                              "packages": "setup",
+                              "version": "2.8.71",
+                              "release": "5.el7_1"
+                              }
+                   }
+        extractor = MessageDataExtractor(None)
+        extractor.ci_message = message
+        self.assertEqual(extractor.check_valid_ci_message(), False)
+    # End of message data extractor tests
+
+    def test_data_extractor_check_fail2(self):
+        message = {'message': {"weight": 0.2, "parent": None},
+                   'header': {"owner": "jkulda",
+                              "scratch": "true",
+                              "method": "build",
+                              "target": "rhel-7.1-candidate",
+                              "new": "RUNNING",
+                              "packages": "setup",
+                              "version": "2.8.71",
+                              "release": "5.el7_1"
+                              }
+                   }
+        extractor = MessageDataExtractor(None)
+        extractor.ci_message = message
+        self.assertEqual(extractor.check_valid_ci_message(), False)
+
+    def test_data_extractor_pass_ansible(self):
+        message = {'message': {"weight": 0.2, "parent": None},
+                   'header': {"owner": "jkulda",
+                              "scratch": "true",
+                              "method": "build",
+                              "target": "rhel-7.1-candidate",
+                              "new": "CLOSED",
+                              "package": "setup",
+                              "version": "2.8.71",
+                              "release": "5.el7_1"
+                              }
+                   }
+        output = {'scratch': 'true',
+                  'version': '2.8.71',
+                  'owner': 'jkulda',
+                  'release': '5.el7_1',
+                  'package': 'setup',
+                  'target': 'rhel-7.1-candidate'}
+        extractor = MessageDataExtractorAnsible(None)
+        extractor.ci_message = message
+        self.assertEqual(extractor.check_valid_ci_message(), True)
+        self.assertEqual(extractor.get_build_data(), output)
     # End of PDC tests
 
 if __name__ == '__main__':
