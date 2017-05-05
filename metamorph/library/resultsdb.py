@@ -171,8 +171,8 @@ class ResultsDBApi(MetamorphPlugin):
             response_data = self.query_api(self.resultsdb_api_url, self.url_options)
             if not response_data['data']:
                 logging.info("job name has not published results to resultsDB yet, sleeping...")
-                time.sleep(self.MINUTE)  # Sleeping for 1 minute
-                self.TIMEOUT_LIMIT -= self.MINUTE
+                time.sleep(60)  # Sleeping for 1 minute
+                self.TIMEOUT_LIMIT -= 60  # Timeout limit minus one minute
             else:
                 i += 1
                 next_page = response_data['next']

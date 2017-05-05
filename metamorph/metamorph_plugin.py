@@ -9,8 +9,6 @@ import requests
 
 class MetamorphPlugin(object):
 
-    MINUTE = 60
-
     def __init__(self):
         pass
 
@@ -51,7 +49,7 @@ class MetamorphPlugin(object):
                 logging.info("An exception occurred while querying url: '{}'. "
                              "Trying again after one minute.".format(url))
                 attempt += 1
-                time.sleep(self.MINUTE)
+                time.sleep(60)  # Sleeping for one minute
                 self.query_api(url, url_options, attempt, ca_cert)
             else:
                 logging.error("ERROR: Unable to access url '{0}' with given options '{1}'.".format(url, url_options))
