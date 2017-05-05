@@ -7,7 +7,7 @@ import yaml
 from git import Repo
 from git.exc import GitCommandError
 
-from metamorph.lib.support_functions import setup_logging
+from metamorph.lib.support_functions import setup_logging, read_json_file
 from argparse import ArgumentParser, ArgumentError
 
 
@@ -103,8 +103,10 @@ class Provision(object):
 
         :param osp_config_path -- Path to osp config in cloned repository
         """
-        with open(osp_config_path) as osp_config:
-            self.osp_data = json.load(osp_config)
+        try:
+            self.osp_data = read_json_file(osp_config_path)
+        except IOError:
+            raise LookupError('OSP config file "{}" was not found. Please check file path'.format(osp_config_path))
         self.res_defs['networks'] = self.osp_data['sites'][0]['networks']
         self.res_defs['keypair'] = self.osp_data['sites'][0]['keypair']
         self.res_defs['flavor'] = self.osp_data['resources'][0].get('flavor', 'm1.small')
@@ -119,8 +121,11 @@ class Provision(object):
         :param metadata_path -- Path to metadata file in cloned repository
         :param metadata_location -- Dictionary of searched metadata in given metadata file
         """
-        with open(metadata_path) as metadata_fp:
-            metadata = yaml.load(metadata_fp)
+        try:
+            with open(metadata_path) as metadata_fp:
+                metadata = yaml.load(metadata_fp)
+        except IOError:
+            raise LookupError('Metadata file "{}" was not found. Please check file path'.format(metadata_path))
         for metadata_name, location_value in metadata_location.items():
             try:
                 extracted_data = self.get_metadata_from_location(metadata, location_value, location_value[-1])
@@ -174,10 +179,10 @@ class Provision(object):
 
         :returns found metadata
         """
-        if type(metadata_source) is list:
+        if isinstance(metadata_source, list):
             metadata_source = self.get_correct_metadata_tree(metadata_source, metadata_location)
         if metadata_name in metadata_source.keys():
-            if type(metadata_source[metadata_name]) is dict:
+            if isinstance(metadata_source[metadata_name], dict):
                 raise ProvisionException("Metadata value can not be dictionary type. For more information see"
                                          " documentation.")
             return metadata_source[metadata_name]
@@ -196,8 +201,7 @@ class Provision(object):
 
         :returns repository name
         """
-        if git_repo.endswith('/'):
-            git_repo = git_repo[:-1]
+        git_repo = git_repo.rstrip('/')
         splitted_repo_path = git_repo.split('/')
         return splitted_repo_path[-1].split('.')[0]
 
@@ -248,11 +252,15 @@ def setup_metadata_location_param(args):
 
 
 def write_results(destination, results, json_type=True):
-    with open(destination, 'w') as destination_fp:
-        if json_type:
-            json.dump(results, destination_fp)
-        else:
-            yaml.dump(results, destination_fp)
+    try:
+        with open(destination, 'w') as destination_fp:
+            if json_type:
+                json.dump(results, destination_fp)
+            else:
+                yaml.dump(results, destination_fp)
+    except IOError:
+        raise LookupError('Destination path "{}" was not found. '
+                          'Please check destination output path'.format(destination))
 
 
 def main():

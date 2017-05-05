@@ -70,7 +70,7 @@ and how to run resultsdb ansible module:
 Provision
 +++++++++
 Provision plugin purpose is to create topology files. These files will be handled by linch pin tool.
-This plugin created two files:
+This plugin creates two files:
 * topology.json - contains all data needed for provisioning
 * topology_credentials.yaml - contains needed credentials for VM creation
 These two files are created from openstack config file.
