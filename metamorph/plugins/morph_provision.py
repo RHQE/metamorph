@@ -7,7 +7,7 @@ import yaml
 from git import Repo
 from git.exc import GitCommandError
 
-from metamorph.lib.logging_conf import setup_logging
+from metamorph.lib.support_functions import setup_logging
 from argparse import ArgumentParser, ArgumentError
 
 
@@ -265,7 +265,8 @@ def main():
     elif not args.metadata_file and args.metadata_loc:
         raise ArgumentError(None, "Argument error: '--metadata-loc' "
                                   "must be provided with '--metadata-file' argument")
-    setup_metadata_location_param(args)
+    if args.metadata_file:  # Metadata location data must be
+        setup_metadata_location_param(args)
     provisioning = Provision(args.git_repo, args.metadata_file, args.metadata_loc, args.osp_config)
     topology = provisioning.get_provision_metadata()
     write_results(args.output_topology, topology)
