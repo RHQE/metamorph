@@ -5,14 +5,15 @@ import logging.config
 
 import requests
 
-from metamorph.lib.support_functions import setup_logging, write_json_file
+from metamorph.lib.support_functions import setup_logging
+from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 class PDCApiException(Exception):
     pass
 
 
-class PDCApi(object):
+class PDCApi(MetamorphPlugin):
     """
     PDCApi class for extracting metadata from pdc
     """
@@ -39,6 +40,7 @@ class PDCApi(object):
     MAX_QUERIED_DATA_SIZE = 20
 
     def __init__(self, pdc_api_url, ca_cert, component_nvr):
+        super().__init__()
         self.pdc_api_url = pdc_api_url
         self.ca_cert = ca_cert
         self.component_nvr = component_nvr
@@ -253,7 +255,7 @@ def main():
     args = parse_args()
     client = PDCApi(args.pdc_api_url, args.ca_cert, args.component_nvr)
     pdc_metadata = client.get_pdc_metadata_by_component_name()
-    write_json_file(dict(pdc=dict(results=pdc_metadata)), args.output)
+    client.write_json_file(dict(pdc=dict(results=pdc_metadata)), args.output)
 
 if __name__ == '__main__':
     main()
