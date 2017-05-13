@@ -69,8 +69,6 @@ PDC metadata:
 import logging
 import logging.config
 
-import requests
-
 from metamorph.lib.support_functions import setup_logging
 from metamorph.metamorph_plugin import MetamorphPlugin
 from ansible.module_utils.basic import AnsibleModule
@@ -129,7 +127,7 @@ class PDCApi(MetamorphPlugin):
             url = "{0}/{1}/?".format(self.pdc_api_url, pdc_metadata_type)
             metadata = []
             while url and len(metadata) / self.MAX_QUERIED_DATA_SIZE < limit:
-                queried_data = self.query_pdc(url, self.pdc_name_mapping[pdc_metadata_type])
+                queried_data = self.query_api(url, self.pdc_name_mapping[pdc_metadata_type])
                 url = queried_data['next']
                 metadata += queried_data['results']
             pdc_metadata[pdc_metadata_type] = metadata
@@ -150,7 +148,7 @@ class PDCApi(MetamorphPlugin):
         rpm_mappings = dict()
         for release_id in release_ids:
             rpm_mapping_url = "{0}/releases/{1}/rpm-mapping/{2}/?".format(self.pdc_api_url, release_id, component_name)
-            rpm_mappings[release_id] = self.query_pdc(rpm_mapping_url)
+            rpm_mappings[release_id] = self.query_api(rpm_mapping_url)
         return rpm_mappings
 
     def get_release_ids(self, release_components, rpms):
@@ -188,24 +186,6 @@ class PDCApi(MetamorphPlugin):
         """
         splitted_compose = compose.split('-')
         return splitted_compose[0].lower() + '-' + splitted_compose[1]
-
-    def query_pdc(self, url, url_options=None):
-        """
-        This method queries pdc_api with given url and url_option variable
-
-        :param url -- pdc api url
-        :param url_options -- dictionary of wanted options
-
-        :returns -- Queried data
-        """
-        try:
-            response = requests.get(url, params=url_options, verify=self.ca_cert)
-            response.raise_for_status()
-            return response.json()
-        except requests.HTTPError as detail:
-            logging.error('Unsuccessful connection to pdc api url '
-                          'with url="{0}" and options="{1}"'.format(url, url_options))
-            raise PDCApiException('Unsuccessful connection to pdc api url with detail= "{}"'.format(detail))
 
     def setup_pdc_metadata_params(self, name, version, release):
         """
