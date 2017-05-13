@@ -25,8 +25,20 @@ def setup_logging(default_path='logging.json', default_level=logging.INFO, env_k
 
 
 def write_json_file(input_data, output="metamorph.json"):
-    with open(output, "w") as metamorph:
-        json.dump(dict(messages=input_data), metamorph, indent=2)
+    if os.path.isfile(output):
+        with open(output) as existing_metamorph:
+            existing_metadata = json.load(existing_metamorph)
+        plugin_name = list(input_data)[0]
+        if 'metamorph' in existing_metadata.keys():
+            existing_metadata['metamorph'][plugin_name] = input_data[plugin_name]
+            with open(output, 'w') as metamorph:
+                json.dump(existing_metadata, metamorph, indent=2)
+        else:
+            raise LookupError("ERROR: Wrong format of given '{}'. "
+                              "'metamorph' must be root element".format(output))
+    else:
+        with open(output, "w") as metamorph:
+            json.dump(dict(metamorph=input_data), metamorph, indent=2)
 
 
 def read_json_file(input_file):
