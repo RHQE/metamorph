@@ -84,3 +84,25 @@ key=path,to,metadata:
 How to run this plugin:
 * without metadata specification: ``python3 morph_provision.py --git-repo <git-repository-path> --osp-config <osp-config-path>``
 * with metadata specification: ``python3 morph_provision.py --git-repo <git-repository-path> --osp-config <osp-config-path> --metadata-file <metadata-file> --metadata-loc <metadata location>``
+
+Metamorph for PDC
++++++++++++++++++
+Metamorph for pdc plugin extracts all possible metadata from pdc by providing component nvr.
+Product definition center (PDC) contains **Test provision metadata**, **Test run metadata** and **Test report metadata**
+This makes PDC a really important metadata storage and obviously **Metamorph** needs to provide them.
+
+How to execute metamorph for pdc:
+``python metamorph/plugins/morph_pdc.py --component-nvr <component-name-version-release> --pdc-api-url <pdc-api-url>``
+
+Execution pdc ansible module:
+``ansible <host> -m pdc -a "component-nvr=<component-name-version-release> pdc-api-url=<pdc-api-url>"``
+
+
+Message data extractor
+++++++++++++++++++++++
+The aim of this plugin is to extract important metadata from CI messages like target, owners, release information and many more.
+
+Easiest way to run this plugin is by:
+``python3 message_data_extractor ci_message.json``
+
+Extracted data are stored in json file.

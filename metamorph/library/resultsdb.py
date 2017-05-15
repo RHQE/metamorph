@@ -102,6 +102,7 @@ import os
 
 from metamorph.lib.support_functions import setup_logging
 from metamorph.metamorph_plugin import MetamorphPlugin
+
 from ansible.module_utils.basic import AnsibleModule
 
 
