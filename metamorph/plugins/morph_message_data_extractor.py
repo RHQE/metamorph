@@ -96,7 +96,7 @@ def main():
     args = parse_args()
     data_extractor = MessageDataExtractor(args.ci_message)
     ci_message_data = data_extractor.get_ci_message_data()
-    MetamorphPlugin.write_json_file(dict(message_data=ci_message_data), args.output)
+    MetamorphPlugin.write_json_file(dict(ci_message_data=ci_message_data), args.output)
 
 
 if __name__ == '__main__':
