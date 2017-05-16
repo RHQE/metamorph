@@ -154,18 +154,19 @@ def main():
     args = parse_args()
     try:
         ci_message = args.func(args)
-        MetamorphPlugin.write_json_file(ci_message, args.output)
+        MetamorphPlugin.write_json_file(dict(ci_message=ci_message), args.output)
     except Exception as exc:
         if "\'Namespace\' object has no attribute \'func\'".startswith(exc.__str__()):
             logging.warning("You need to specify input. Please run: \"morph_messagehub.py --help\" "
                             "for more information")
-        elif args.env_variable:
-            logging.error("ERROR during parsing json data from environmental variable. Please check provided data or "
-                          "given environmental variable itself.")
-        else:
+        try:
+            if args.env_variable:
+                logging.error("ERROR during parsing json data from environmental variable. "
+                              "Please check provided data or given environmental variable itself.")
+        except AttributeError:
             logging.error("Error with function parsing. If this is a bug make an issue in github repo.\n "
                           "Message: {0}".format(exc))
-            exit(1)
+        exit(1)
 
 if __name__ == '__main__':
     main()
