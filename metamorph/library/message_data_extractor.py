@@ -147,7 +147,7 @@ def main():
         json.dump(ci_message_data, metamorph, indent=2)
 
     write_json_file(ci_message_data, module.params['output'])
-    module.exit_json(changed=True, meta=dict(messages=ci_message_data))
+    module.exit_json(changed=True, meta=dict(ci_message_data=ci_message_data))
 
 
 if __name__ == '__main__':

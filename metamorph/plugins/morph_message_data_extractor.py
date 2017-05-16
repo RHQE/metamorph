@@ -4,6 +4,7 @@ import logging
 import json
 
 from metamorph.lib.support_functions import setup_logging, read_json_file
+from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 class MessageDataExtractor(object):
@@ -95,8 +96,7 @@ def main():
     args = parse_args()
     data_extractor = MessageDataExtractor(args.ci_message)
     ci_message_data = data_extractor.get_ci_message_data()
-    with open(args.output, "w") as metamorph:
-        json.dump(ci_message_data, metamorph, indent=2)
+    MetamorphPlugin.write_json_file(dict(ci_message_data=ci_message_data), args.output)
 
 
 if __name__ == '__main__':
