@@ -1,21 +1,20 @@
 #!/usr/bin/python
 import logging
 import logging.config
-import json
-import yaml
 
 from git import Repo
 from git.exc import GitCommandError
 
 from metamorph.lib.support_functions import setup_logging, read_json_file
 from argparse import ArgumentParser, ArgumentError
+from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 class ProvisionException(Exception):
     pass
 
 
-class Provision(object):
+class Provision(MetamorphPlugin):
     """
     Class for openstack topology creation.
     Provide method for topology credentials creation.
@@ -29,7 +28,7 @@ class Provision(object):
     resource_groups = {
         'resource_group_name': "openstack",
         'res_group_type': "openstack",
-        'assoc_creds': '',
+        'credentials': {'profile': 'e2e-openstack', 'auth_type': ''},
         'res_defs': dict
     }
 
@@ -43,12 +42,14 @@ class Provision(object):
         'networks': []
     }
 
-    def __init__(self, git_repo, metadata, metadata_loc, osp_config):
+    def __init__(self, git_repo, metadata, metadata_loc, osp_config, credentials_name):
+        super().__init__()
         self.git_repo = git_repo
         self.metadata_file = metadata
         self.metadata_loc = metadata_loc
         self.osp_config = osp_config
         self.osp_data = dict
+        self.credentials_name = credentials_name
         self.openstack_topology_credentials = dict()
 
     def get_provision_metadata(self):
@@ -56,7 +57,8 @@ class Provision(object):
         Method for getting provision topology
         Credentials values are stored in openstack_topology_credentials parameter
 
-        :returns dictionary of provision topology
+        :returns tuple -- first elements is dictionary of provision topology and second dictionary
+                          of topology credentials
         """
         self.clone_git_repository(self.git_repo)
         self.setup_topology_by_osp_config(self.osp_config)
@@ -65,10 +67,9 @@ class Provision(object):
             self.setup_topology_by_metadata(self.metadata_file, self.metadata_loc)
         self.resource_groups['res_defs'] = self.res_defs
         self.provision_topology['resource_groups'] = self.resource_groups
-        return self.provision_topology
+        return self.provision_topology, self.openstack_topology_credentials
 
-    @staticmethod
-    def get_openstack_credentials(osp_data):
+    def get_openstack_credentials(self, osp_data):
         """
         Static method for getting openstack credentials
         :param osp_data -- osp_config data
@@ -80,8 +81,10 @@ class Provision(object):
                                  'project': osp_data['sites'][0]['project'],
                                  'username': osp_data['sites'][0]['username'],
                                  'password': osp_data['sites'][0]['password']}
-        topology_credentials = '{}_openstack.yaml'.format(osp_data['sites'][0]['project'].replace('-', '_'))
-        return {topology_credentials: openstack_credentials}
+        if self.credentials_name == 'unknown_credentials.yaml':
+            self.credentials_name = '{}_openstack.yaml'.format(osp_data['sites'][0]['project'].replace('-', '_'))
+        self.resource_groups['credentials']['auth_type'] = 'file:{}'.format(self.credentials_name)
+        return openstack_credentials
 
     def clone_git_repository(self, git_repo):
         """
@@ -122,8 +125,7 @@ class Provision(object):
         :param metadata_location -- Dictionary of searched metadata in given metadata file
         """
         try:
-            with open(metadata_path) as metadata_fp:
-                metadata = yaml.load(metadata_fp)
+            metadata = self.read_yaml_file(metadata_path)
         except IOError:
             raise LookupError('Metadata file "{}" was not found. Please check file path'.format(metadata_path))
         for metadata_name, location_value in metadata_location.items():
@@ -230,9 +232,9 @@ def parse_args():
                         default='topology.yaml',
                         help='Name of topology file for provisioning',
                         nargs='?')
-    parser.add_argument('--output-topology-credentials',
+    parser.add_argument('--topology-credentials-name',
                         metavar='<output-topology-credentials-file>',
-                        default='unknown_openstack.yaml',
+                        default='unknown_credentials.yaml',
                         help='Name of topology credentials for provisioning',
                         nargs='?')
     return parser.parse_args()
@@ -251,18 +253,6 @@ def setup_metadata_location_param(args):
     args.metadata_loc = location
 
 
-def write_results(destination, results, json_type=True):
-    try:
-        with open(destination, 'w') as destination_fp:
-            if json_type:
-                json.dump(results, destination_fp)
-            else:
-                yaml.dump(results, destination_fp)
-    except IOError:
-        raise LookupError('Destination path "{}" was not found. '
-                          'Please check destination output path'.format(destination))
-
-
 def main():
     setup_logging(default_path="metamorph/etc/logging.json")
     logging.captureWarnings(True)
@@ -275,14 +265,11 @@ def main():
                                   "must be provided with '--metadata-file' argument")
     if args.metadata_file:  # Metadata location data must be
         setup_metadata_location_param(args)
-    provisioning = Provision(args.git_repo, args.metadata_file, args.metadata_loc, args.osp_config)
-    topology = provisioning.get_provision_metadata()
-    write_results(args.output_topology, topology)
-    credentials_name = list(provisioning.openstack_topology_credentials.keys())[0]
-    topology_credentials = provisioning.openstack_topology_credentials[credentials_name]
-    if args.output_topology_credentials != 'unknown_openstack.yaml':
-        credentials_name = args.output_topology_credentials
-    write_results(credentials_name, topology_credentials, json_type=False)
+    provisioning = Provision(args.git_repo, args.metadata_file, args.metadata_loc, args.osp_config,
+                             args.topology_credentials_name)
+    topology, topology_credentials = provisioning.get_provision_metadata()
+    provisioning.write_yaml_file(topology, args.output_topology)
+    provisioning.write_yaml_file(topology_credentials, provisioning.credentials_name)
 
 if __name__ == '__main__':
     main()

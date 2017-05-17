@@ -3,6 +3,7 @@ import logging.config
 import json
 import time
 import os
+import yaml
 
 import requests
 
@@ -28,6 +29,25 @@ class MetamorphPlugin(object):
         else:
             with open(output, "w") as metamorph:
                 json.dump(dict(metamorph=input_data), metamorph, indent=2)
+
+    @staticmethod
+    def read_json_file(input_file):
+        with open(input_file, "r") as message:
+            return json.load(message)
+
+    @staticmethod
+    def write_yaml_file(output_data, destination):
+        try:
+            with open(destination, 'w') as destination_fp:
+                yaml.dump(output_data, destination_fp)
+        except IOError:
+            raise LookupError('Destination path "{}" was not found. '
+                              'Please check destination output path'.format(destination))
+
+    @staticmethod
+    def read_yaml_file(input_file):
+        with open(input_file, "r") as message:
+            return yaml.load(message)
 
     def query_api(self, url, url_options=dict, attempt=0, ca_cert='/etc/ssl/certs/ca-bundle.crt'):
         """

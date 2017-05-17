@@ -270,12 +270,12 @@ class MyTestCase(unittest.TestCase):
 
     # Provision testing
     def test_metadata_path_getter(self):
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         path = provision.get_git_repo_name('https://github.com/Jurisak/metamorph.git')
         self.assertEqual(path, 'metamorph')
 
     def test_topology_setup(self):
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         provision.setup_topology_by_osp_config('./tests/sources/osp_config.json')
         res_defs = {
             "res_name": "unknown_inst",
@@ -291,11 +291,11 @@ class MyTestCase(unittest.TestCase):
         self.assertDictEqual(provision.res_defs, res_defs)
 
     def test_clone_repo(self):
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         provision.clone_git_repository('https://github.com/Jurisak/bkrdoc.git')
 
     def test_minimal_topology(self):
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         provision.setup_topology_by_osp_config('./tests/sources/osp_config1.json')
         res_defs = {
             "res_name": "unknown_inst",
@@ -313,34 +313,34 @@ class MyTestCase(unittest.TestCase):
     def test_get_metadata_by_location(self):
         metadata = {'path': {'to': {'metadata': 'goal'}}}
         metadata_location = {'metadata': ['path', 'to', 'metadata']}
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         self.assertEqual('goal', provision.get_metadata_from_location(metadata, metadata_location['metadata'],
                                                                       'metadata'))
 
     def test_get_metadata_by_location2(self):
         metadata = {'path': {'to': {'metadata': 'goal'}}}
         metadata_location = {'metadata': ['path', 'to']}
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         self.assertEqual('goal', provision.get_metadata_from_location(metadata, metadata_location['metadata'],
                                                                       'metadata'))
 
     def test_get_metadata_by_location_failed(self):
         metadata = {'path': {'to': {'metadata': 'goal'}}}
         metadata_location = {'metadata': ['path', 'metadata']}
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         self.assertRaises(KeyError, provision.get_metadata_from_location, metadata, metadata_location['metadata'],
                           'metadata')
 
     def test_topology_credential_creation(self):
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         provision.setup_topology_by_osp_config('./tests/sources/osp_config1.json')
         credentials = provision.get_openstack_credentials(provision.osp_data)
-        credentials_output = {'_openstack.yaml': {'endpoint': '', 'password': '', 'project': '', 'username': ''}}
+        credentials_output = {'endpoint': '', 'password': '', 'project': '', 'username': ''}
 
         self.assertDictEqual(credentials_output, credentials)
 
     def test_metadata_extraction(self):
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         metadata_location = {'count': ['project', 'info', 'something', 'source_count'],
                              'keypair': ['project', 'info', 'something', 'keypair']}
         provision.setup_topology_by_metadata('./tests/sources/metadata.yaml', metadata_location)
@@ -356,7 +356,7 @@ class MyTestCase(unittest.TestCase):
         self.assertDictEqual(provision.res_defs, res_defs)
 
     def test_metadata_extraction_failure(self):
-        provision = Provision('', '', '', '')
+        provision = Provision('', '', '', '', '')
         metadata_location = {'count': ['project', 'info', 'something'],
                              'keypair': ['project', 'info', 'something']}
         self.assertRaises(ProvisionException, provision.setup_topology_by_metadata, './tests/sources/metadata.yaml',
