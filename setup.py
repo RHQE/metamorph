@@ -8,5 +8,6 @@ setup(
     license='',
     author='Jiri Kulda',
     author_email='Kulda12@seznam.cz, jkulda@redhat.com',
-    description='Exhibiting structural change of test metadata.', requires=['ansible', 'requests', 'GitPython']
+    description='Exhibiting structural change of test metadata.',
+    requires=['ansible', 'requests', 'GitPython']
 )

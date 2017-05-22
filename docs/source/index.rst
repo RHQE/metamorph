@@ -75,7 +75,7 @@ This plugin creates two files:
 * topology_credentials.yaml - contains needed credentials for VM creation
 These two files are created from openstack config file.
 
-Provision plugin provides possibility to update topology values from metadata file and metadata location dictionary
+Provision plugin provides the ability to update topology values from the metadata file and the metadata location dictionary
 configuration of metadata location:
 key=path,to,metadata:
 * key - topology field name
@@ -97,31 +97,3 @@ How to execute metamorph for pdc:
 Execution pdc ansible module:
 ``ansible <host> -m pdc -a "component-nvr=<component-name-version-release> pdc-api-url=<pdc-api-url>"``
 
-
-Message data extractor
-++++++++++++++++++++++
-The aim of this plugin is to extract important metadata from CI messages like target, owners, release information and many more.
-
-Easiest way to run this plugin is by:
-``python3 message_data_extractor ci_message.json``
-
-Extracted data are stored in json file.
-
-
-Provision
-+++++++++
-Provision plugin purpose is to create topology files. These files will be handled by linch pin tool.
-This plugin creates two files:
-* topology.json - contains all data needed for provisioning
-* topology_credentials.yaml - contains needed credentials for VM creation
-These two files are created from openstack config file.
-
-Provision plugin provides possibility to update topology values from metadata file and metadata location dictionary
-configuration of metadata location:
-key=path,to,metadata:
-* key - topology field name
-* metadata - name of searched metadata in path,to,metadata
-
-How to run this plugin:
-* without metadata specification: ``python3 morph_provision.py --git-repo <git-repository-path> --osp-config <osp-config-path>``
-* with metadata specification: ``python3 morph_provision.py --git-repo <git-repository-path> --osp-config <osp-config-path> --metadata-file <metadata-file> --metadata-loc <metadata location>``
