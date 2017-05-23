@@ -1,0 +1,22 @@
+{
+    "resources": [
+        {
+            "name": "ci-ops",
+            "flavor": "m1.large",
+            "count": "1",
+            "image": "fedora-20_image"
+        }
+    ],
+    "sites": [
+        {
+            "site": "ci-osp",
+            "endpoint": "openstack_endpoint",
+            "project": "my_project",
+            "username": "Jurisak",
+            "password": "SuperSecretPassword",
+            "keypair": "team-jenkins",
+            "networks": ["team-jenkins"],
+            "region": ""
+        }
+    ]
+}

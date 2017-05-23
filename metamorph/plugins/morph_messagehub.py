@@ -164,8 +164,8 @@ def main():
                 logging.error("ERROR during parsing json data from environmental variable. "
                               "Please check provided data or given environmental variable itself.")
         except AttributeError:
-            logging.error("Error with function parsing. If this is a bug make an issue in github repo.\n "
-                          "Message: {0}".format(exc))
+            logging.error("Error with function parsing. If this is a bug make an issue in "
+                          "github repo.\n Message: {0}".format(exc))
         exit(1)
 
 if __name__ == '__main__':

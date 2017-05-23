@@ -1,3 +1,5 @@
 stomp.py
 ansible
 requests
+PyYaml
+GitPython
