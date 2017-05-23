@@ -3,15 +3,17 @@ import argparse
 import logging
 import json
 
-from metamorph.lib.support_functions import setup_logging, read_json_file
+from metamorph.lib.support_functions import setup_logging
+from metamorph.metamorph_plugin import MetamorphPlugin
 
 
-class MessageDataExtractor(object):
+class MessageDataExtractor(MetamorphPlugin):
     """
     Metadata Extractor from CI messages
     """
 
     def __init__(self, ci_message_file):
+        super().__init__()
         self.ci_message = {}
         self.ci_message_file = ci_message_file
 
@@ -37,12 +39,13 @@ class MessageDataExtractor(object):
         return self.get_build_data()
 
     def read_input_file(self):
+        """Method for """
         try:
-            self.ci_message = read_json_file(self.ci_message_file)
+            self.ci_message = self.read_json_file(self.ci_message_file)
         except Exception as detail:
             logging.error("Failed to parse input json file with message: {}".format(detail))
-            logging.debug("Failed to parse input json file with message: {0} and traceback: {1}".format(
-                detail, detail.__traceback__))
+            logging.debug("Failed to parse input json file with message: {0} "
+                          "and traceback: {1}".format(detail, detail.__traceback__))
             exit(1)
 
     def check_valid_ci_message(self):
@@ -54,13 +57,14 @@ class MessageDataExtractor(object):
 
         :returns json with extracted metadata
         """
-        return dict(package=self.ci_message['header']['package'],
-                    release=self.ci_message['header']['release'],
-                    version=self.ci_message['header']['version'],
-                    target=self.ci_message['header']['target'],
-                    owner=self.ci_message['header']['owner'],
-                    scratch=self.ci_message['header'].get('scratch', 'false')
-                    )
+        return dict(
+            package=self.ci_message['header']['package'],
+            release=self.ci_message['header']['release'],
+            version=self.ci_message['header']['version'],
+            target=self.ci_message['header']['target'],
+            owner=self.ci_message['header']['owner'],
+            scratch=self.ci_message['header'].get('scratch', 'false')
+        )
 
     @staticmethod
     def is_closed_build(message):
@@ -68,7 +72,8 @@ class MessageDataExtractor(object):
 
     @staticmethod
     def is_component_build(message):
-        return message['header']['method'] == "build" and message['header'].get('package') is not None
+        return message['header']['method'] == "build" and \
+            message['header'].get('package') is not None
 
 
 def parse_args():
@@ -95,8 +100,7 @@ def main():
     args = parse_args()
     data_extractor = MessageDataExtractor(args.ci_message)
     ci_message_data = data_extractor.get_ci_message_data()
-    with open(args.output, "w") as metamorph:
-        json.dump(ci_message_data, metamorph, indent=2)
+    data_extractor.write_json_file(ci_message_data, args.output)
 
 
 if __name__ == '__main__':

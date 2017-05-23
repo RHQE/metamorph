@@ -82,7 +82,8 @@ class Provision(MetamorphPlugin):
                                  'username': osp_data['sites'][0]['username'],
                                  'password': osp_data['sites'][0]['password']}
         if self.credentials_name == 'unknown_credentials.yaml':
-            self.credentials_name = '{}_openstack.yaml'.format(osp_data['sites'][0]['project'].replace('-', '_'))
+            self.credentials_name = '{}_openstack.yaml'.format(
+                osp_data['sites'][0]['project'].replace('-', '_'))
         self.resource_groups['credentials']['auth_type'] = 'file:{}'.format(self.credentials_name)
         return openstack_credentials
 
@@ -97,8 +98,8 @@ class Provision(MetamorphPlugin):
             Repo.clone_from(git_repo, repo_name)
         except GitCommandError as detail:
             logging.error('Error during cloning git repository "{0}"'.format(git_repo))
-            raise ProvisionException("Error during cloning git repository {0} with detail: {1}".format(git_repo,
-                                                                                                       detail))
+            raise ProvisionException("Error during cloning git "
+                                     "repository {0} with detail: {1}".format(git_repo, detail))
 
     def setup_topology_by_osp_config(self, osp_config_path):
         """
@@ -109,7 +110,8 @@ class Provision(MetamorphPlugin):
         try:
             self.osp_data = read_json_file(osp_config_path)
         except IOError:
-            raise LookupError('OSP config file "{}" was not found. Please check file path'.format(osp_config_path))
+            raise LookupError('OSP config file "{}" was not found. '
+                              'Please check file path'.format(osp_config_path))
         self.res_defs['networks'] = self.osp_data['sites'][0]['networks']
         self.res_defs['keypair'] = self.osp_data['sites'][0]['keypair']
         self.res_defs['flavor'] = self.osp_data['resources'][0].get('flavor', 'm1.small')
@@ -127,13 +129,15 @@ class Provision(MetamorphPlugin):
         try:
             metadata = self.read_yaml_file(metadata_path)
         except IOError:
-            raise LookupError('Metadata file "{}" was not found. Please check file path'.format(metadata_path))
+            raise LookupError('Metadata file "{}" was not found. '
+                              'Please check file path'.format(metadata_path))
         for metadata_name, location_value in metadata_location.items():
             try:
-                extracted_data = self.get_metadata_from_location(metadata, location_value, location_value[-1])
+                extracted_data = self.get_metadata_from_location(metadata, location_value,
+                                                                 location_value[-1])
             except KeyError as detail:
-                raise ProvisionException('Unable to find key "{0}" '
-                                         'in given path "{1}"'.format(detail, metadata_location[metadata_name]))
+                raise ProvisionException('Unable to find key "{0}" in given path '
+                                         '"{1}"'.format(detail, metadata_location[metadata_name]))
             self.update_topology_by_metadata(metadata_name, extracted_data)
 
     @staticmethod
@@ -150,7 +154,8 @@ class Provision(MetamorphPlugin):
         for metadata_tree in metadata_source:
             if metadata_location[0] in metadata_tree.keys():
                 return metadata_tree
-        raise ProvisionException('Unable to find key "{}" in given metadata file'.format(metadata_location[0]))
+        raise ProvisionException('Unable to find key "{}" in '
+                                 'given metadata file'.format(metadata_location[0]))
 
     def update_topology_by_metadata(self, metadata_name, metadata_value):
         """
@@ -185,11 +190,12 @@ class Provision(MetamorphPlugin):
             metadata_source = self.get_correct_metadata_tree(metadata_source, metadata_location)
         if metadata_name in metadata_source.keys():
             if isinstance(metadata_source[metadata_name], dict):
-                raise ProvisionException("Metadata value can not be dictionary type. For more information see"
-                                         " documentation.")
+                raise ProvisionException("Metadata value can not be dictionary type. "
+                                         "For more information see documentation.")
             return metadata_source[metadata_name]
         elif not metadata_source:
-            raise ProvisionException('Unable to find metadata "{}" in given metadata location'.format(metadata_name))
+            raise ProvisionException('Unable to find metadata "{}" in given '
+                                     'metadata location'.format(metadata_name))
         return self.get_metadata_from_location(metadata_source[metadata_location[0]],
                                                metadata_location[1:],
                                                metadata_name)
@@ -226,7 +232,8 @@ def parse_args():
                           help='Path to metadata yaml file in given git repository')
     metadata.add_argument("--metadata-loc", action='append',
                           type=lambda kv: kv.split("=", 1),
-                          help='Metadata name with location. Usage --metadata-loc metadata=path,to,metadata')
+                          help='Metadata name with location. Usage --metadata-loc '
+                               'metadata=path,to,metadata')
     parser.add_argument('--output-topology',
                         metavar='<output-topology-file>',
                         default='topology.yaml',

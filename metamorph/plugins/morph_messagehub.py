@@ -160,11 +160,11 @@ def main():
             logging.warning("You need to specify input. Please run: \"morph_messagehub.py --help\" "
                             "for more information")
         elif args.env_variable:
-            logging.error("ERROR during parsing json data from environmental variable. Please check provided data or "
-                          "given environmental variable itself.")
+            logging.error("ERROR during parsing json data from environmental variable. Please check"
+                          " provided data or given environmental variable itself.")
         else:
-            logging.error("Error with function parsing. If this is a bug make an issue in github repo.\n "
-                          "Message: {0}".format(exc))
+            logging.error("Error with function parsing. If this is a bug make an issue in "
+                          "github repo.\n Message: {0}".format(exc))
             exit(1)
 
 if __name__ == '__main__':
