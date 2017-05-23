@@ -213,7 +213,8 @@ class ResultsDBApi(MetamorphPlugin):
                        job_name=[],
                        tier_tag=False)
         for single_job in self.job_names_result:
-            ci_tier['job_name'].append({single_job: self.format_job_name_result(self.job_names_result[single_job])})
+            ci_tier['job_name'].append({single_job: self.format_job_name_result(
+                self.job_names_result[single_job])})
         ci_tier['tier_tag'] = self.tier_tag
         result = {"tier": ci_tier}
         return dict(results=result)
@@ -228,7 +229,8 @@ class ResultsDBApi(MetamorphPlugin):
         formatted_data = []
         for single_job_result in job_name_result:
             formatted_data.append(dict(build_url=single_job_result['ref_url'].split('/console')[0],
-                                       build_number=self.get_build_number_from_url(single_job_result['ref_url']),
+                                       build_number=self.get_build_number_from_url(
+                                           single_job_result['ref_url']),
                                        build_status=single_job_result['outcome']))
             if single_job_result['outcome'] == 'FAILED':
                 self.tier_tag = False
@@ -287,7 +289,8 @@ def main():
     setup_logging(default_path="./etc/logging.json")
     module = AnsibleModule(argument_spec=argument_spec, mutually_exclusive=mutually_exclusive)
     if not (module.params['nvr'] or module.params['ci_message'] or module.params['env_variable']):
-        module.fail_json(msg="Error in argument parsing. One of (nvr, ci_message, env_variable) is required")
+        module.fail_json(msg="Error in argument parsing. "
+                             "One of (nvr, ci_message, env_variable) is required")
     get_nvr_information(module)
     resultsdb = ResultsDBApi(module.params['job_names'],
                              module.params['nvr'],

@@ -35,7 +35,8 @@ Error message:
   returned: Error
   type: dictionary
   sample:  { "changed": false, "failed": true, "module_stderr": Given CI_message does not contain
-                                                                important key values. Missing key value: 'header'"
+                                                                important key values. Missing key
+                                                                value: 'header'"
 CI-message metadata:
   description: Extracted CI-message metadata
   returned: changed
@@ -83,24 +84,26 @@ class MessageDataExtractor(MetamorphPlugin):
         self.read_input_file()
         try:
             if not self.check_valid_ci_message():
-                raise CIMessageKeyValueException("Given CI_message does not contain important data.")
+                raise CIMessageKeyValueException("Given CI_message does not contain "
+                                                 "important data.")
         except KeyError as key_detail:
-            raise CIMessageKeyValueException("Given CI_message does not contain important key values. "
-                                             "Missing key value: {}".format(key_detail))
+            raise CIMessageKeyValueException("Given CI_message does not contain important key "
+                                             "values. Missing key value: {}".format(key_detail))
         return self.get_build_data()
 
     def read_input_file(self):
         try:
             self.ci_message = self.read_json_file(self.ci_message_file)
         except FileNotFoundError as detail:
-            logging.debug("Failed to parse input json file because file was not found: {0} and traceback: {1}".format(
-                detail, detail.__traceback__))
-            raise CIMessageReadingException("Failed to parse input json file with because file was not found with "
-                                            "message: {}".format(detail))
+            logging.debug("Failed to parse input json file because file was not found: {0} "
+                          "and traceback: {1}".format(detail, detail.__traceback__))
+            raise CIMessageReadingException("Failed to parse input json file with because file "
+                                            "was not found with message: {}".format(detail))
         except ValueError as detail:
-            logging.debug("Failed to parse input json file with message: {0} and traceback: {1}".format(
-                detail, detail.__traceback__))
-            raise CIMessageReadingException("Failed to parse input json file with message: {}".format(detail))
+            logging.debug("Failed to parse input json file with message: {0} "
+                          "and traceback: {1}".format(detail, detail.__traceback__))
+            raise CIMessageReadingException("Failed to parse input json file "
+                                            "with message: {}".format(detail))
 
     def check_valid_ci_message(self):
         return self.is_closed_build(self.ci_message) and self.is_component_build(self.ci_message)
@@ -125,7 +128,8 @@ class MessageDataExtractor(MetamorphPlugin):
 
     @staticmethod
     def is_component_build(message):
-        return message['header']['method'] == "build" and message['header'].get('package') is not None
+        return message['header']['method'] == "build" and \
+            message['header'].get('package') is not None
 
 
 def main():

@@ -193,10 +193,11 @@ def main():
         try:
             ci_message = json.loads(ci_message.replace('\\n', ''))
         except ValueError as detail:
-            module.fail_json(msg="Error occurred during json parsing from given environmental variable. "
-                                 "See detail: '{}'".format(detail))
+            module.fail_json(msg="Error occurred during json parsing from given environmental "
+                                 "variable. See detail: '{}'".format(detail))
     elif not (module.params['user'] and module.params['password'] and module.params['host']):
-        module.fail_json(msg="Error in argument parsing. Arguments: user, password and host are required")
+        module.fail_json(msg="Error in argument parsing. Arguments: user, "
+                             "password and host are required")
     else:
         error_message, ci_message = messagebus_run(module)
 

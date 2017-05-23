@@ -2,15 +2,17 @@
 import logging
 import logging.config
 
+from argparse import ArgumentParser, ArgumentError
+
+from metamorph.lib.support_functions import setup_logging
+from metamorph.metamorph_plugin import MetamorphPlugin
+
 from git import Repo
 from git.exc import GitCommandError
 
-from metamorph.lib.support_functions import setup_logging, read_json_file
-from argparse import ArgumentParser, ArgumentError
-from metamorph.metamorph_plugin import MetamorphPlugin
-
 
 class ProvisionException(Exception):
+    """Provision exception class"""
     pass
 
 
@@ -108,7 +110,7 @@ class Provision(MetamorphPlugin):
         :param osp_config_path -- Path to osp config in cloned repository
         """
         try:
-            self.osp_data = read_json_file(osp_config_path)
+            self.osp_data = self.read_json_file(osp_config_path)
         except IOError:
             raise LookupError('OSP config file "{}" was not found. '
                               'Please check file path'.format(osp_config_path))
@@ -261,6 +263,7 @@ def setup_metadata_location_param(args):
 
 
 def main():
+    """Main function which manages plugin behavior"""
     setup_logging(default_path="metamorph/etc/logging.json")
     logging.captureWarnings(True)
     args = parse_args()
