@@ -75,6 +75,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 
 class PDCApiException(Exception):
+    """PDC API Exception class"""
     pass
 
 
@@ -268,6 +269,7 @@ class PDCApi(MetamorphPlugin):
 
 
 def main():
+    """Main function which manages plugin behavior"""
     pdc_arguments = {
         "component-nvr": {"type": "str", 'required': True},
         "pdc-api-url": {"type": "str", 'required': True},

@@ -107,6 +107,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 
 class ResultsDBApiException(Exception):
+    """ResultsDB API Exception class"""
     pass
 
 
@@ -144,6 +145,7 @@ class ResultsDBApi(MetamorphPlugin):
             return self.job_names_result
 
     def erase_duplicity_results(self):
+        """Method for erasing duplicity results in queried data"""
         for job_name in self.job_names_result:
             job_name_data = []
             ref_urls = set()
@@ -271,6 +273,7 @@ def get_nvr_information(module):
 
 
 def main():
+    """Main function which manages plugin behavior"""
     argument_spec = dict(
         job_names=dict(type='list', nargs='*'),
         resultsdb_api_url=dict(required=True, type='str'),

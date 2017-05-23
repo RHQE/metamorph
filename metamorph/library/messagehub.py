@@ -103,12 +103,13 @@ CI message:
 '''
 
 
-import stomp
 import logging
 import logging.config
 import time
 import os
 import json
+
+import stomp
 
 from metamorph.lib.support_functions import setup_logging
 from metamorph.metamorph_plugin import MetamorphPlugin
@@ -116,6 +117,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 
 class CIListener(stomp.ConnectionListener):
+    """CIListener class manages connection and extraction of CI messages"""
     def __init__(self, count):
         self.count = count
         self.metamorph_data = []
@@ -132,6 +134,13 @@ class CIListener(stomp.ConnectionListener):
 
 
 def messagebus_run(module):
+    """
+    Method manages CI message extraction from message bus
+
+    :param module -- ansible module arguments
+
+    :return Dictionary which contain CI message/s
+    """
     conn = stomp.Connection([(module.params['host'], module.params['port'])])
     listener = CIListener(module.params['count'])
     conn.set_listener('CI Listener', listener)
@@ -160,6 +169,7 @@ def messagebus_run(module):
 
 
 def main():
+    """Main function which manages plugin behavior"""
     messagebus = {
         "user": {"type": "str"},
         "password": {"type": "str"},
