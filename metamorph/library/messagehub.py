@@ -202,7 +202,7 @@ def main():
 
     if not error_message:
         MetamorphPlugin.write_json_file(ci_message, module.params['output'])
-        module.exit_json(changed=True, meta=dict(messages=ci_message))
+        module.exit_json(changed=True, meta=dict(ci_message=ci_message))
     else:
         module.fail_json(msg="Error occurred in processing CI Message.", meta=error_message)
 

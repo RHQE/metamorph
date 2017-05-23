@@ -49,9 +49,9 @@ CI-message metadata:
 '''
 
 import logging
-import json
 
-from metamorph.lib.support_functions import setup_logging, read_json_file, write_json_file
+from metamorph.lib.support_functions import setup_logging
+from metamorph.metamorph_plugin import MetamorphPlugin
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -63,12 +63,13 @@ class CIMessageReadingException(Exception):
     pass
 
 
-class MessageDataExtractor(object):
+class MessageDataExtractor(MetamorphPlugin):
     """
     Metadata Extractor from CI messages
     """
 
     def __init__(self, ci_message_file):
+        super().__init__()
         self.ci_message = {}
         self.ci_message_file = ci_message_file
         self.error_message = ""
@@ -90,7 +91,7 @@ class MessageDataExtractor(object):
 
     def read_input_file(self):
         try:
-            self.ci_message = read_json_file(self.ci_message_file)
+            self.ci_message = self.read_json_file(self.ci_message_file)
         except FileNotFoundError as detail:
             logging.debug("Failed to parse input json file because file was not found: {0} and traceback: {1}".format(
                 detail, detail.__traceback__))
@@ -143,11 +144,8 @@ def main():
     except Exception as detail:
         module.fail_json(msg=detail)
 
-    with open(module.params['output'], "w") as metamorph:
-        json.dump(ci_message_data, metamorph, indent=2)
-
-    write_json_file(ci_message_data, module.params['output'])
-    module.exit_json(changed=True, meta=dict(messages=ci_message_data))
+    data_extractor.write_json_file(dict(ci_message_data=ci_message_data), module.params['output'])
+    module.exit_json(changed=True, meta=dict(ci_message_data=ci_message_data))
 
 
 if __name__ == '__main__':
