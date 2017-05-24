@@ -35,7 +35,8 @@ Error message:
   returned: Error
   type: dictionary
   sample:  { "changed": false, "failed": true, "module_stderr": Given CI_message does not contain
-                                                                important key values. Missing key value: 'header'"
+                                                                important key values. Missing key
+                                                                value: 'header'"
 CI-message metadata:
   description: Extracted CI-message metadata
   returned: changed
@@ -49,6 +50,7 @@ CI-message metadata:
 '''
 
 import logging
+import traceback
 
 from metamorph.lib.support_functions import setup_logging
 from metamorph.metamorph_plugin import MetamorphPlugin
@@ -56,10 +58,12 @@ from ansible.module_utils.basic import AnsibleModule
 
 
 class CIMessageKeyValueException(Exception):
+    """CI Message key value exception class"""
     pass
 
 
 class CIMessageReadingException(Exception):
+    """CI Message reading exception class"""
     pass
 
 
@@ -83,26 +87,34 @@ class MessageDataExtractor(MetamorphPlugin):
         self.read_input_file()
         try:
             if not self.check_valid_ci_message():
-                raise CIMessageKeyValueException("Given CI_message does not contain important data.")
+                raise CIMessageKeyValueException("Given CI_message does not contain "
+                                                 "important data.")
         except KeyError as key_detail:
-            raise CIMessageKeyValueException("Given CI_message does not contain important key values. "
-                                             "Missing key value: {}".format(key_detail))
+            raise CIMessageKeyValueException("Given CI_message does not contain important key "
+                                             "values. Missing key value: {}".format(key_detail))
         return self.get_build_data()
 
     def read_input_file(self):
+        """Method for reading input ci message file"""
         try:
             self.ci_message = self.read_json_file(self.ci_message_file)
         except FileNotFoundError as detail:
-            logging.debug("Failed to parse input json file because file was not found: {0} and traceback: {1}".format(
-                detail, detail.__traceback__))
-            raise CIMessageReadingException("Failed to parse input json file with because file was not found with "
-                                            "message: {}".format(detail))
+            logging.debug("Failed to parse input json file because file was not found: {0} "
+                          "and traceback: {1}".format(detail, traceback.print_exc()))
+            raise CIMessageReadingException("Failed to parse input json file with because file "
+                                            "was not found with message: {}".format(detail))
         except ValueError as detail:
-            logging.debug("Failed to parse input json file with message: {0} and traceback: {1}".format(
-                detail, detail.__traceback__))
-            raise CIMessageReadingException("Failed to parse input json file with message: {}".format(detail))
+            logging.debug("Failed to parse input json file with message: {0} "
+                          "and traceback: {1}".format(detail, traceback.print_exc()))
+            raise CIMessageReadingException("Failed to parse input json file "
+                                            "with message: {}".format(detail))
 
     def check_valid_ci_message(self):
+        """
+        Method for checking whether method contain needed data
+
+        :return Boolean
+        """
         return self.is_closed_build(self.ci_message) and self.is_component_build(self.ci_message)
 
     def get_build_data(self):
@@ -111,24 +123,41 @@ class MessageDataExtractor(MetamorphPlugin):
 
         :returns json with extracted metadata
         """
-        return dict(package=self.ci_message['header']['package'],
-                    release=self.ci_message['header']['release'],
-                    version=self.ci_message['header']['version'],
-                    target=self.ci_message['header']['target'],
-                    owner=self.ci_message['header']['owner'],
-                    scratch=self.ci_message['header'].get('scratch', 'false')
-                    )
+        return dict(
+            package=self.ci_message['header']['package'],
+            release=self.ci_message['header']['release'],
+            version=self.ci_message['header']['version'],
+            target=self.ci_message['header']['target'],
+            owner=self.ci_message['header']['owner'],
+            scratch=self.ci_message['header'].get('scratch', 'false')
+        )
 
     @staticmethod
     def is_closed_build(message):
+        """
+        Method for checking whether ci message is type of closed build
+
+        :param message -- CI message which will be checked
+
+        :return Boolean
+        """
         return message['header']['new'] == 'CLOSED'
 
     @staticmethod
     def is_component_build(message):
-        return message['header']['method'] == "build" and message['header'].get('package') is not None
+        """
+        Method for checking whether given CI message is from component build
+
+        :param message -- CI message which will be checked
+
+        :return Boolean
+        """
+        return message['header']['method'] == "build" and \
+            message['header'].get('package') is not None
 
 
 def main():
+    """Main function which manages plugin behavior"""
     extractor_args = {
         "ci-message": {"type": "str", "required": True},
         "output": {"type": "str", "default": "metamorph.json"}

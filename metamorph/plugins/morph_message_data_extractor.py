@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import argparse
 import logging
+import traceback
 
 from metamorph.lib.support_functions import setup_logging
 from metamorph.metamorph_plugin import MetamorphPlugin
@@ -38,16 +39,21 @@ class MessageDataExtractor(MetamorphPlugin):
         return self.get_build_data()
 
     def read_input_file(self):
-        """Method for """
+        """Method for reading input ci message file"""
         try:
             self.ci_message = self.read_json_file(self.ci_message_file)
         except Exception as detail:
             logging.error("Failed to parse input json file with message: {}".format(detail))
             logging.debug("Failed to parse input json file with message: {0} "
-                          "and traceback: {1}".format(detail, detail.__traceback__))
+                          "and traceback: {1}".format(detail, traceback.print_exc()))
             exit(1)
 
     def check_valid_ci_message(self):
+        """
+        Method for checking whether method contain needed data
+
+        :return Boolean
+        """
         return self.is_closed_build(self.ci_message) and self.is_component_build(self.ci_message)
 
     def get_build_data(self):
@@ -67,10 +73,24 @@ class MessageDataExtractor(MetamorphPlugin):
 
     @staticmethod
     def is_closed_build(message):
+        """
+        Method for checking whether ci message is type of closed build
+
+        :param message -- CI message which will be checked
+
+        :return Boolean
+        """
         return message['header']['new'] == 'CLOSED'
 
     @staticmethod
     def is_component_build(message):
+        """
+        Method for checking whether given CI message is from component build
+
+        :param message -- CI message which will be checked
+
+        :return Boolean
+        """
         return message['header']['method'] == "build" and \
             message['header'].get('package') is not None
 
@@ -95,6 +115,7 @@ def parse_args():
 
 
 def main():
+    """Main function which manages plugin behavior"""
     setup_logging(default_path="etc/logging.json")
     args = parse_args()
     data_extractor = MessageDataExtractor(args.ci_message)

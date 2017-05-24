@@ -75,6 +75,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 
 class PDCApiException(Exception):
+    """PDC API Exception class"""
     pass
 
 
@@ -131,7 +132,8 @@ class PDCApi(MetamorphPlugin):
                 url = queried_data['next']
                 metadata += queried_data['results']
             pdc_metadata[pdc_metadata_type] = metadata
-        pdc_metadata['rpm-mapping'] = self.get_rpm_mappings(component_name, pdc_metadata['release-components'],
+        pdc_metadata['rpm-mapping'] = self.get_rpm_mappings(component_name,
+                                                            pdc_metadata['release-components'],
                                                             pdc_metadata['rpms'])
         return pdc_metadata
 
@@ -147,7 +149,9 @@ class PDCApi(MetamorphPlugin):
         release_ids = self.get_release_ids(release_components, rpms)
         rpm_mappings = dict()
         for release_id in release_ids:
-            rpm_mapping_url = "{0}/releases/{1}/rpm-mapping/{2}/?".format(self.pdc_api_url, release_id, component_name)
+            rpm_mapping_url = "{0}/releases/{1}/rpm-mapping/{2}/?".format(self.pdc_api_url,
+                                                                          release_id,
+                                                                          component_name)
             rpm_mappings[release_id] = self.query_api(rpm_mapping_url)
         return rpm_mappings
 
@@ -196,10 +200,8 @@ class PDCApi(MetamorphPlugin):
         """
         for pdc_metadata_type in self.pdc_name_mapping:
             for param, param_value in self.pdc_name_mapping[pdc_metadata_type].items():
-                self.pdc_name_mapping[pdc_metadata_type][param] = param_value.format(self.get_param_value(param,
-                                                                                                          name,
-                                                                                                          version,
-                                                                                                          release))
+                self.pdc_name_mapping[pdc_metadata_type][param] = param_value.format(
+                    self.get_param_value(param, name, version, release))
 
     def get_param_value(self, param, name, version, release):
         """
@@ -267,6 +269,7 @@ class PDCApi(MetamorphPlugin):
 
 
 def main():
+    """Main function which manages plugin behavior"""
     pdc_arguments = {
         "component-nvr": {"type": "str", 'required': True},
         "pdc-api-url": {"type": "str", 'required': True},
@@ -276,7 +279,8 @@ def main():
 
     setup_logging(default_path="metamorph/etc/logging.json")
     module = AnsibleModule(argument_spec=pdc_arguments)
-    client = PDCApi(module.params['pdc-api-url'], module.params['ca-cert'], module.params['component-nvr'])
+    client = PDCApi(module.params['pdc-api-url'], module.params['ca-cert'],
+                    module.params['component-nvr'])
     pdc_metadata = client.get_pdc_metadata_by_component_name()
     client.write_json_file(dict(pdc=dict(results=pdc_metadata)), module.params['output'])
     module.exit_json(changed=True, meta=dict(pdc=pdc_metadata))

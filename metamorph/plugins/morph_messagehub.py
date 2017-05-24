@@ -4,14 +4,22 @@ import logging
 import logging.config
 import time
 import os
-import stomp
 import json
+
+import stomp
 
 from metamorph.lib.support_functions import setup_logging
 from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 def messagebus_run(args):
+    """
+    Method manages CI message extraction from message bus
+
+    :param args -- command line arguments
+
+    :return Dictionary which contain CI message/s
+    """
     conn = stomp.Connection([(args.host, args.port)])
     listener = CIListener(args.count)
     conn.set_listener('CI Listener', listener)
@@ -42,6 +50,13 @@ def messagebus_run(args):
 
 
 def env_run(args):
+    """
+    Method for extracting CI message/s from environmental variable
+
+    :param args -- command line arguments
+
+    :return Dictionary which contain CI message/s
+    """
     env_data = os.environ.get(args.env_variable, "UNKNOWN")
     if env_data == "UNKNOWN":
         logging.error("Environmental variable not found")
@@ -134,6 +149,8 @@ def parse_args():
 
 
 class CIListener(stomp.ConnectionListener):
+    """CIListener class manages connection and extraction of CI messages"""
+
     def __init__(self, count):
         self.count = count
         self.metamorph_data = []
@@ -150,6 +167,7 @@ class CIListener(stomp.ConnectionListener):
 
 
 def main():
+    """Main function which manages plugin behavior"""
     setup_logging(default_path="metamorph/etc/logging.json")
     args = parse_args()
     try:

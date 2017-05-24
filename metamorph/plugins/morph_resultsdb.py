@@ -11,6 +11,7 @@ from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 class ResultsDBApiException(Exception):
+    """ResultsDB API Exception class"""
     pass
 
 
@@ -48,6 +49,7 @@ class ResultsDBApi(MetamorphPlugin):
             return self.job_names_result
 
     def erase_duplicity_results(self):
+        """Method for erasing duplicity results in queried data"""
         for job_name in self.job_names_result:
             job_name_data = []
             ref_urls = set()
@@ -211,6 +213,7 @@ def get_nvr_information(args):
 
 
 def main():
+    """Main function which manages plugin behavior"""
     setup_logging(default_path="metamorph/etc/logging.json")
     logging.captureWarnings(True)
     args = parse_args()

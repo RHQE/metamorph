@@ -8,6 +8,7 @@ from metamorph.metamorph_plugin import MetamorphPlugin
 
 
 class PDCApiException(Exception):
+    """PDC API Exception"""
     pass
 
 
@@ -232,6 +233,7 @@ def parse_args():
 
 
 def main():
+    """Main function which manages plugin behavior"""
     setup_logging(default_path="metamorph/etc/logging.json")
     args = parse_args()
     client = PDCApi(args.pdc_api_url, args.ca_cert, args.component_nvr)
